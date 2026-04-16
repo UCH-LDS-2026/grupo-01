@@ -23,9 +23,13 @@ La solución propuesta permite digitalizar y agilizar el proceso de autorizacion
 ## Funcionalidades principales
 
 A. Registro de solicitud medica.
-B. Evaluacion de solicitudes
-C. Consulta de estado de la solicitud
+
+B. Evaluacion de solicitudes.
+
+C. Consulta de estado de la solicitud.
+
 D. Priorizacion automatica (primero solicitud de autorizacion alta, luego media y luego baja).
+
 E. Panel de Gestion - Dashboard (Proporciona una vista general de las solicitudes destacando las pendientes y prioritarias)
 
 ## Stack tecnológico
