@@ -39,6 +39,7 @@ E. Panel de Gestion - Dashboard (Proporciona una vista general de las solicitude
 - Base de datos:MySQL
 
 ## Cómo ejecutar el proyecto
+
 1. Clonar el repositorio: git clone <URL_DEL_REPO>
 
 2.Importar la base de datos en MySQL
