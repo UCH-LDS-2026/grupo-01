@@ -22,18 +22,25 @@ La solución propuesta permite digitalizar y agilizar el proceso de autorizacion
 
 ## Funcionalidades principales
 
-- Registro de solicitud medica
-- Evaluacion de solicitudes
-- Consulta de estado de la solicitud
-- Priorizacion automatica (primero solicitud de autorizacion alta, luego media y luego baja)
-- Panel de Gestion - Dashboard (Proporciona una vista general de las solicitudes destacando las pendientes y prioritarias)
+A. Registro de solicitud medica.
+B. Evaluacion de solicitudes
+C. Consulta de estado de la solicitud
+D. Priorizacion automatica (primero solicitud de autorizacion alta, luego media y luego baja).
+E. Panel de Gestion - Dashboard (Proporciona una vista general de las solicitudes destacando las pendientes y prioritarias)
 
 ## Stack tecnológico
 
-Frontend:PHP, HTML y CSS
-Backend:PHP
-Base de datos:MySQL
+- Frontend:PHP, HTML y CSS
+- Backend:PHP
+- Base de datos:MySQL
 
 ## Cómo ejecutar el proyecto
+1. Clonar el repositorio: git clone <URL_DEL_REPO>
 
-Instrucciones
+2.Importar la base de datos en MySQL
+
+3.Configurar conexión a la base de datos en el archivo correspondiente (ej: config.php)
+
+4.Ejecutar el proyecto en un servidor local: XAMPP
+
+5.Acceder desde el navegador: http://localhost/nombre-del-proyecto
