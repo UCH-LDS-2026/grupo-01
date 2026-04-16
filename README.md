@@ -4,9 +4,10 @@
 ## Grupo N° 1
 
 ## Integrantes:
-- Nombre
-- Nombre
-- Nombre
+- Bazan Franco
+- Le Donne Micaela
+- Molina Agostina
+- Müller Lisandro
 
 ## Problema que resuelve
 
