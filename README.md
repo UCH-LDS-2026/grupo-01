@@ -15,14 +15,18 @@ La solución propuesta permite digitalizar y automatizar el proceso de autorizac
 
 ## Usuarios
 
-Quién utilizará el sistema.
-
-## Funcionalidades principales
-
 - Medico
 - Paciente
 - Administrativo
 - Administrador del sistema
+
+## Funcionalidades principales
+
+- Registro de solicitud medica
+- Evaluacion de solicitudes
+- Consulta de estado de la solicitud
+- Priorizacion automatica (primero solicitud de autorizacion alta, luego media y luego baja)
+- Panel de Gestion - Dashboard (Proporciona una vista general de las solicitudes destacando las pendientes y prioritarias)
 
 ## Stack tecnológico
 
