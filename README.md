@@ -11,7 +11,7 @@
 
 ## Problema que resuelve
 
-La solución propuesta permite digitalizar y agilizar el proceso de autorizaciones en las obras sociales, agilizando asi las evaluaciones, priorizando casos urgentes y ofreciendo seguimiento en tiempo real, lo que mejora la eficiencia y reduce los tiempos de espera.
+La solución propuesta permite digitalizar y agilizar el proceso de autorizaciones en las obras sociales, agilizar tambien las evaluaciones, priorizando casos urgentes y ofreciendo seguimiento en tiempo real, lo que mejora la eficiencia y reduce los tiempos de espera.
 
 ## Usuarios
 
