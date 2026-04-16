@@ -11,7 +11,7 @@
 
 ## Problema que resuelve
 
-Descripción del problema.
+La solución propuesta permite digitalizar y automatizar el proceso de autorizaciones en las obras sociales, agilizando asi las evaluaciones, priorizando casos urgentes y ofreciendo seguimiento en tiempo real, lo que mejora la eficiencia y reduce los tiempos de espera.
 
 ## Usuarios
 
@@ -19,15 +19,16 @@ Quién utilizará el sistema.
 
 ## Funcionalidades principales
 
-- Feature 1
-- Feature 2
-- Feature 3
+- Medico
+- Paciente
+- Administrativo
+- Administrador del sistema
 
 ## Stack tecnológico
 
-Frontend:
-Backend:
-Base de datos:
+Frontend:PHP, HTML y CSS
+Backend:PHP
+Base de datos:MySQL
 
 ## Cómo ejecutar el proyecto
 
