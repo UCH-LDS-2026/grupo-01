@@ -1,7 +1,24 @@
-node_modules
-.env
-__pycache__
-*.log
-dist
-build
+# Archivos del sistema
 .DS_Store
+Thumbs.db
+
+# Configuración sensible
+config.php
+.env
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Dependencias (si usan composer)
+vendor/
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Node (si usan algo frontend)
+node_modules/
+
+# XAMPP / uploads
+uploads/
