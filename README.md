@@ -33,6 +33,13 @@ El sistema optimiza las evaluaciones, prioriza casos urgentes y brinda seguimien
 - Adjuntar archivos médicos (órdenes, estudios, etc.)  
 
 ---
+## Estrategia de ramas
+
+- main → versión estable (protegida)
+- develop → integración
+- feature/* → nuevas funcionalidades
+
+---
 
 ## Stack tecnológico
 - **Frontend:** HTML, CSS, Bootstrap  
