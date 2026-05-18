@@ -1,13 +1,23 @@
 <?php
-echo "<h1> MediFlow funcionando correctamente</h1>";
-echo "<p>El servidor PHP está activo.</p>";
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Prueba de conexión a la base de datos
-$conexion = new mysqli("localhost", "root", "", "mediflow");
+session_start();
 
-if ($conexion->connect_error) {
-    die("<p>Error de conexión a la base de datos</p>");
+// Si el usuario está logueado
+if (isset($_SESSION['usuario'])) {
+
+    $usuario = $_SESSION['usuario'];
+
+    echo "<h2>Bienvenido " . $usuario['nombre'] . "</h2>";
+    echo "<p>Email: " . $usuario['email'] . "</p>";
+    echo "<p>Rol: " . $usuario['rol'] . "</p>";
+
+    echo "<br><a href='/MediFlow/grupo-01/MediFlow/logout.php'>Cerrar sesión</a>";
+
 } else {
-    echo "<p>Conexión a la base de datos exitosa</p>";
+    // Si no está logueado → va al login
+    header("Location: /MediFlow/grupo-01/MediFlow/vista/login.php");
+    exit;
 }
 ?>
