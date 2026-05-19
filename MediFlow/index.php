@@ -111,7 +111,31 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
                     <h4>Auditoría Médica</h4>
                     <p>Próximamente disponible.</p> //borro ese texto y pongo Aprobacion y rechazo de practias o autorizaciones.
                 </a>
-
+               <?php if (strtolower(trim($rol)) == 'admin' || strtolower(trim($rol)) == 'administrador'): ?>
+                <a href="/mediflow/grupo-01/MediFlow/vista/usuarios.php" class="module-button">
+                    <div class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h4>Gestión de Personal</h4>
+                    <p>Alta y baja de médicos, auditores y pacientes.</p>
+                </a>
+                <?php endif; ?>
+                <?php if (strtolower(trim($rol)) == 'admin' || strtolower(trim($rol)) == 'administrador'): ?>
+                <a href="/mediflow/grupo-01/MediFlow/vista/practicas.php" class="module-button">
+                    <div class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    <h4>Gestión de Prácticas</h4>
+                    <p>Configurar catálogo y nomenclador de estudios.</p>
+                </a>
+                <?php endif; ?>
             </div>
         </div>
 

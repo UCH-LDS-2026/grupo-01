@@ -16,16 +16,19 @@ $rolNormalizado = strtolower(trim($rolUsuarioOriginal));
 require_once __DIR__ . '/../../src/config.php'; 
 require_once __DIR__ . '/../modelo/Solicitud.php';
 require_once __DIR__ . '/../modelo/Paciente.php';
+require_once __DIR__ . '/../modelo/Usuario.php';   
+require_once __DIR__ . '/../modelo/Practica.php';  
 
 /** @var mysqli $conexion */
 $solicitudModelo = new Solicitud($conexion);
 $pacienteModelo = new Paciente($conexion);
+$usuarioModelo = new Usuario($conexion);
+$practicaModelo = new Practica($conexion);
 
 $listaSolicitudes = $solicitudModelo->listar();
 $listaPacientes = $pacienteModelo->listar(); 
-
-$medicosDemo = [['id' => 1, 'nombre' => 'Dr. Roberto Fernández'], ['id' => 2, 'nombre' => 'Dra. Laura Gómez']];
-$practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, 'nombre' => 'Radiografía Tórax'], ['id' => 3, 'nombre' => 'Resonancia Magnética']];
+$listaMedicos = $usuarioModelo->listarMedicos(); 
+$listaPracticas = $practicaModelo->listar();   
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -45,6 +48,7 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
         .btn-aprobar { background-color: #28a745; color: white; padding: 5px 8px; border-radius: 4px; text-decoration: none; font-size: 12px; margin-right: 2px; display: inline-block; }
         .btn-rechazar { background-color: #dc3545; color: white; padding: 5px 8px; border-radius: 4px; text-decoration: none; font-size: 12px; margin-right: 2px; display: inline-block; }
         .btn-observar { background-color: #0284c7; color: white; padding: 5px 8px; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; }
+        .btn-archivo { background-color: #0f766e; color: white; padding: 3px 6px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: bold; display: inline-block; }
     </style>
 </head>
 <body>
@@ -59,9 +63,10 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
         <?php if ($rolNormalizado == 'medico' || $rolNormalizado == 'admin'): ?>
         <div class="card">
             <h2> Cargar Nueva Solicitud Médica</h2>
-            <form action="../controlador/solicitudControlador.php" method="POST">
+            <form action="../controlador/solicitudControlador.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="accion" value="crear">
                 <div class="form-grid">
+                    
                     <div class="form-group">
                         <label>Afiliado (Paciente)</label>
                         <select name="id_paciente" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
@@ -73,24 +78,31 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
                             <?php endforeach; ?>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Médico Solicitante</label>
                         <select name="id_medico" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
                             <option value="">-- Seleccione un Médico --</option>
-                            <?php foreach ($medicosDemo as $m): ?>
-                                <option value="<?php echo $m['id']; ?>"><?php echo $m['nombre']; ?></option>
+                            <?php foreach ($listaMedicos as $m): ?>
+                                <option value="<?php echo $m['id_usuario']; ?>">
+                                    <?php echo htmlspecialchars($m['apellido'] . ', ' . $m['nombre']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Práctica Requerida</label>
                         <select name="id_practica" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
                             <option value="">-- Seleccione Práctica --</option>
-                            <?php foreach ($practicasDemo as $prac): ?>
-                                <option value="<?php echo $prac['id']; ?>"><?php echo $prac['nombre']; ?></option>
+                            <?php foreach ($listaPracticas as $prac): ?>
+                                <option value="<?php echo $prac['id_practica']; ?>">
+                                    <?php echo htmlspecialchars($prac['nombre']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Fecha de Solicitud</label>
                         <input type="date" name="fecha" value="<?php echo date('Y-m-d'); ?>" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
@@ -103,6 +115,12 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
                             <option value="Alta">Alta / Urgente</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label>Estudio / Receta Adjunta (PDF, Imagen)</label>
+                        <input type="file" name="adjunto" accept=".pdf,.png,.jpg,.jpeg" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; background:white;">
+                    </div>
+
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Diagnóstico (Justificación Clínica)</label>
                         <input type="text" name="diagnostico" placeholder="Ej: Justificación clínica para la auditoría..." required>
@@ -121,12 +139,13 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
                 <table>
                     <thead>
                         <tr>
-                            <th>N° Solicitud</th>
+                            <th>N°</th>
                             <th>Fecha</th>
                             <th>Paciente</th>
                             <th>DNI</th>
                             <th>Práctica</th>
                             <th>Diagnóstico</th>
+                            <th style="text-align: center;">Documento</th>
                             <th>Prioridad</th>
                             <th style="text-align: center;">Estado</th>
                             <?php if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin'): ?>
@@ -137,17 +156,17 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
                     <tbody>
                         <?php if (empty($listaSolicitudes)): ?>
                             <tr>
-                                <td colspan="<?php echo ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin') ? '9' : '8'; ?>" class="no-data">No hay solicitudes médicas registradas.</td>
+                                <td colspan="<?php echo ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin') ? '10' : '9'; ?>" class="no-data">No hay solicitudes médicas registradas.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($listaSolicitudes as $s): 
-                          $estadoNormalizado = strtolower(trim($s['estado']));
-    
-                          $claseBadge = 'badge-pendiente';
-                          // Validamos si es aprobada o aceptada
-                          if($estadoNormalizado == 'aprobada' || $estadoNormalizado == 'aceptada') $claseBadge = 'badge-aceptada';
-                          if($estadoNormalizado == 'rechazada') $claseBadge = 'badge-rechazada';
-                          if($estadoNormalizado == 'observada') $claseBadge = 'badge-observada';
+                                $estadoNormalizado = strtolower(trim($s['estado']));
+                                $claseBadge = 'badge-pendiente';
+                                if($estadoNormalizado == 'aprobada' || $estadoNormalizado == 'aceptada') $claseBadge = 'badge-aceptada';
+                                if($estadoNormalizado == 'rechazada') $claseBadge = 'badge-rechazada';
+                                if($estadoNormalizado == 'observada') $claseBadge = 'badge-observada';
+                                
+                                $archivoAdjunto = $s['ruta_archivo'] ?? '';
                             ?>
                                 <tr>
                                     <td><strong>#<?php echo htmlspecialchars($s['id_solicitud']); ?></strong></td>
@@ -156,6 +175,15 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
                                     <td><?php echo htmlspecialchars($s['dni'] ?? 'N/A'); ?></td>
                                     <td>Práctica #<?php echo htmlspecialchars($s['id_practica']); ?></td>
                                     <td><?php echo htmlspecialchars($s['diagnostico']); ?></td>
+                                    
+                                    <td style="text-align: center;">
+                                        <?php if (!empty($archivoAdjunto)): ?>
+                                            <a href="../uploads/<?php echo htmlspecialchars($archivoAdjunto); ?>" target="_blank" class="btn-archivo">📎 Ver Adjunto</a>
+                                        <?php else: ?>
+                                            <span style="color: #999; font-size: 11px; font-style: italic;">Sin archivo</span>
+                                        <?php endif; ?>
+                                    </td>
+
                                     <td style="text-transform: capitalize;"><?php echo htmlspecialchars($s['prioridad']); ?></td>
                                     <td style="text-align: center;">
                                         <span class="badge <?php echo $claseBadge; ?>"><?php echo htmlspecialchars($s['estado']); ?></span>
@@ -164,11 +192,11 @@ $practicasDemo = [['id' => 1, 'nombre' => 'Laboratorio Clínico'], ['id' => 2, '
                                     <?php if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin'): ?>
                                         <td style="text-align: center; white-space: nowrap;">
                                             <?php if ($estadoNormalizado == 'pendiente' || $estadoNormalizado == 'observada'): ?>
-                                            <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=aprobada" class="btn-aprobar" onclick="return confirm('¿Aprobar solicitud?');">Aceptar</a>
-    
-                                            <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=rechazada" class="btn-rechazar" onclick="return confirm('¿Rechazar solicitud?');">Rechazar</a>
-    
-                                            <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=observada" class="btn-observar" onclick="return confirm('¿Marcar como observada para corregir datos?');">Observar</a>
+                                                <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=aprobada" class="btn-aprobar" onclick="return confirm('¿Aprobar solicitud?');">Aceptar</a>
+                                                <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=rechazada" class="btn-rechazar" onclick="return confirm('¿Rechazar solicitud?');">Rechazar</a>
+                                                <?php if ($estadoNormalizado != 'observada'): ?>
+                                                    <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=observada" class="btn-observar" onclick="return confirm('¿Marcar como observada para corregir datos?');">Observar</a>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <span style="color:#aaa; font-size:12px;">Finalizada</span>
                                             <?php endif; ?>
