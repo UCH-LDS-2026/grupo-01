@@ -4,7 +4,9 @@ ini_set('display_errors', 1);
 
 session_start();
 
-require_once __DIR__ . '/../config/config.php';
+// CAMBIA ESTA LÍNEA: Subimos dos niveles para ir a la carpeta 'src' externa
+require_once __DIR__ . '/../../src/config.php';
+// Esta queda igual porque el modelo sí está dentro de MediFlow
 require_once __DIR__ . '/../modelo/Usuario.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
