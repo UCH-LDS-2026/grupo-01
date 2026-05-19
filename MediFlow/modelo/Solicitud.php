@@ -7,11 +7,14 @@ class Solicitud {
     }
 
     // REQUERIMIENTO 1: Crear la solicitud
-    public function crear($id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico) {
-        $sql = "INSERT INTO solicitud (id_paciente, id_medico, id_practica, fecha, estado, prioridad, diagnostico) 
-                VALUES (?, ?, ?, ?, 'Pendiente', ?, ?)";
+   public function crear($id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico, $ruta_archivo = null) {
+        // Fijate que agregamos ruta_archivo al final de la consulta SQL
+        $sql = "INSERT INTO solicitud (id_paciente, id_medico, id_practica, fecha, prioridad, diagnostico, estado, ruta_archivo) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', ?)";
+        
         $stmt = $this->conexion->prepare($sql);
-        $stmt->bind_param("iiisss", $id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico);
+        // Agregamos una "s" más en el bind_param para el archivo
+        $stmt->bind_param("iiissss", $id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico, $ruta_archivo);
+        
         return $stmt->execute();
     }
 

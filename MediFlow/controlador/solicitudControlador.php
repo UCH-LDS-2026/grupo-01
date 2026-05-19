@@ -25,22 +25,50 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['accion']) && $_GET['acci
     }
 }
 
-// REQUERIMIENTO 1: Crear la solicitud (Viene por POST del formulario)
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Crear solicitud
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion']) && $_POST['accion'] == 'crear') {
     $id_paciente = $_POST['id_paciente'] ?? null;
     $id_medico = $_POST['id_medico'] ?? null;
     $id_practica = $_POST['id_practica'] ?? null;
     $fecha = $_POST['fecha'] ?? '';
-    $prioridad = $_POST['prioridad'] ?? 'Normal';
+    $prioridad = $_POST['prioridad'] ?? 'Media';
     $diagnostico = $_POST['diagnostico'] ?? '';
 
-    if (isset($_POST['accion']) && $_POST['accion'] == 'crear') {
-        if ($solicitudModelo->crear($id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico)) {
-            header("Location: ../vista/solicitudes.php");
-            exit;
-        } else {
-            echo " Error al crear la solicitud médica.";
+    // --- MAGIA DE ARCHIVOS ---
+    $ruta_archivo = null; 
+    
+    // Verificamos si se subió un archivo y si no hubo errores
+    if (isset($_FILES['adjunto']) && $_FILES['adjunto']['error'] === UPLOAD_ERR_OK) {
+        
+        $nombreOriginal = basename($_FILES['adjunto']['name']);
+        $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
+        
+        // Generamos un nombre único: ej. receta_64f1b2c.pdf
+        $nombreUnico = uniqid('receta_') . '.' . $extension;
+        
+        // Definimos la carpeta donde se van a guardar (fuera del controlador)
+        $carpetaDestino = __DIR__ . '/../uploads/';
+        
+        // Si la carpeta "uploads" no existe, le decimos a PHP que la cree automáticamente
+        if (!file_exists($carpetaDestino)) {
+            mkdir($carpetaDestino, 0777, true);
         }
+
+        // Ruta final donde se moverá el archivo
+        $rutaFinal = $carpetaDestino . $nombreUnico;
+
+        // Movemos el archivo de la memoria temporal a nuestra carpeta
+        if (move_uploaded_file($_FILES['adjunto']['tmp_name'], $rutaFinal)) {
+            // Si se movió con éxito, guardamos el nombre único para la base de datos
+            $ruta_archivo = $nombreUnico;
+        }
+    }
+    // Le pasamos la nueva variable $ruta_archivo a la función crear
+    if ($solicitudModelo->crear($id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico, $ruta_archivo)) {
+        header("Location: ../vista/solicitudes.php");
+        exit;
+    } else {
+        echo " Error al crear la solicitud.";
     }
 }
 ?>
