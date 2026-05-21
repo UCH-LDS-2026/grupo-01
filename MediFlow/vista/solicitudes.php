@@ -189,19 +189,16 @@ $listaPracticas = $practicaModelo->listar();
                                         <span class="badge <?php echo $claseBadge; ?>"><?php echo htmlspecialchars($s['estado']); ?></span>
                                     </td>
                                     
-                                    <?php if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin'): ?>
-                                        <td style="text-align: center; white-space: nowrap;">
-                                            <?php if ($estadoNormalizado == 'pendiente' || $estadoNormalizado == 'observada'): ?>
-                                                <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=aprobada" class="btn-aprobar" onclick="return confirm('¿Aprobar solicitud?');">Aceptar</a>
-                                                <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=rechazada" class="btn-rechazar" onclick="return confirm('¿Rechazar solicitud?');">Rechazar</a>
-                                                <?php if ($estadoNormalizado != 'observada'): ?>
-                                                    <a href="../controlador/solicitudControlador.php?accion=auditar&id=<?php echo $s['id_solicitud']; ?>&estado=observada" class="btn-observar" onclick="return confirm('¿Marcar como observada para corregir datos?');">Observar</a>
-                                                <?php endif; ?>
-                                            <?php else: ?>
-                                                <span style="color:#aaa; font-size:12px;">Finalizada</span>
-                                            <?php endif; ?>
+                                   <?php if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin'): ?>
+    <td style="text-align: center;">
+        <?php if ($estadoNormalizado == 'pendiente' || $estadoNormalizado == 'observada'): ?>
+            <a href="evaluar.php?id=<?php echo $s['id_solicitud']; ?>&archivo=<?php echo urlencode($archivoAdjunto); ?>" class="btn-observar" style="background-color: #0284c7; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold;">Evaluar Solicitud</a>
+        <?php else: ?>
+            <span style="color:#aaa; font-size:12px; font-weight: bold;">Auditada</span>
+        <?php endif; ?>
+    </td>
+<?php endif; ?> 
                                         </td>
-                                    <?php endif; ?>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
