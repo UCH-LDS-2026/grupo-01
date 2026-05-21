@@ -394,6 +394,8 @@ const btn = form.querySelector("button");
 btn.classList.add("loading");
 }
 </script>
-
+<?php if (strtolower(trim($_SESSION['usuario']['rol'] ?? '')) == 'medico'): ?>
+    <a href="vista/notificaciones.php" class="btn-menu">🔔 Notificaciones de Auditoría</a>
+<?php endif; ?>
 </body>
 </html>
