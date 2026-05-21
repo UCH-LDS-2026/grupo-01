@@ -104,13 +104,6 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
                     <p>Carga y consulta de solicitudes médicas.</p>
                 </a>
 
-                <a href="#" class="module-button" style="opacity: 0.6; cursor: not-allowed;"> //sacando el # de href y poniendo el enlace de vista de auditoria medica, habilitamos la caja que se ve en pantalla
-                    <div class="icon-container" style="color: #78909c;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </div>
-                    <h4>Auditoría Médica</h4>
-                    <p>Próximamente disponible.</p> //borro ese texto y pongo Aprobacion y rechazo de practias o autorizaciones.
-                </a>
                <?php if (strtolower(trim($rol)) == 'admin' || strtolower(trim($rol)) == 'administrador'): ?>
                 <a href="/mediflow/grupo-01/MediFlow/vista/usuarios.php" class="module-button">
                     <div class="icon-container">
@@ -136,6 +129,17 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
                     <p>Configurar catálogo y nomenclador de estudios.</p>
                 </a>
                 <?php endif; ?>
+                <?php if (strtolower(trim($rol)) == 'admin' || strtolower(trim($rol)) == 'auditor'): ?>
+<a href="/mediflow/grupo-01/MediFlow/vista/dashboard.php" class="module-button">
+    <div class="icon-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg>
+    </div>
+    <h4>Dashboard Analítico</h4>
+    <p>Métricas, contadores y prioridades.</p>
+</a>
+<?php endif; ?>
             </div>
         </div>
 

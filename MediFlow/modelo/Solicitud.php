@@ -38,5 +38,24 @@ class Solicitud {
         $stmt->bind_param("si", $nuevo_estado, $id_solicitud);
         return $stmt->execute();
     }
+    public function obtenerEstadisticas() {
+        $sql = "SELECT 
+                  SUM(CASE WHEN LOWER(estado) IN ('aprobada', 'aceptada') THEN 1 ELSE 0 END) as aprobadas,
+                  SUM(CASE WHEN LOWER(estado) = 'rechazada' THEN 1 ELSE 0 END) as rechazadas,
+                  SUM(CASE WHEN LOWER(estado) = 'pendiente' THEN 1 ELSE 0 END) as pendientes
+                FROM solicitud";
+        $resultado = $this->conexion->query($sql);
+        return $resultado->fetch_assoc();
+    }
+
+    public function obtenerPendientesDashboard() {
+        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente 
+                FROM solicitud s
+                LEFT JOIN paciente p ON s.id_paciente = p.id_paciente
+                WHERE LOWER(s.estado) = 'pendiente'
+                ORDER BY FIELD(s.prioridad, 'Alta', 'Media', 'Baja'), s.fecha ASC LIMIT 10";
+        $resultado = $this->conexion->query($sql);
+        return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+    }
 }
 ?>
