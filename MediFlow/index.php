@@ -73,7 +73,7 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 
         <div class="card">
             <h2 style="margin-top:0; color:#0b5687; font-size:26px;">¡Hola de nuevo, <?php echo htmlspecialchars($nombre); ?>!</h2>
-            <p style="color: #666; margin-bottom: 30px;">Bienvenido al Panel de MediFlow. Seleccione el módulo con el que desea operar:</p>
+            <p style="color: #666; margin-bottom: 30px;">Bienvenido al Panel de Administración de MediFlow. Seleccione el módulo con el que desea operar:</p>
             
             <div class="modules-grid">
                 
