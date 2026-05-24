@@ -62,9 +62,14 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 </head>
 <body>
 
-    <div class="navbar">
+<div class="navbar">
         <h1>MediFlow <span>• Obra Social</span></h1>
-        <a href="/mediflow/grupo-01/MediFlow/logout.php" class="btn-logout">Cerrar Sesión</a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <?php if ($rolLimpio == 'paciente'): ?>
+                <a href="vista/notificaciones_paciente.php" style="background: #f59e0b; color: white; padding: 8px 12px; border-radius: 50%; text-decoration: none; font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="Mis Notificaciones">🔔</a>
+            <?php endif; ?>
+            <a href="/mediflow/grupo-01/MediFlow/logout.php" class="btn-logout">Cerrar Sesión</a>
+        </div>
     </div>
 
     <div class="container grid-inicio">
@@ -76,10 +81,17 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
             <h3><?php echo htmlspecialchars($nombre . " " . $apellido); ?></h3>
             <span class="badge"><?php echo htmlspecialchars($rol); ?></span>
             
-            <div class="profile-info">
+           <div class="profile-info">
                 <p><strong>Email:</strong><br><?php echo htmlspecialchars($email); ?></p>
                 <p><strong>Entorno:</strong><br>Servidor Local (XAMPP)</p>
             </div>
+
+            <?php if ($rolLimpio == 'paciente'): ?>
+            <div style="margin-top: 15px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                <a href="vista/editar_perfil.php" style="display: inline-block; width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 0; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; text-align: center; transition: background 0.2s;">✏️ Editar Perfil</a>
+            </div>
+            <?php endif; ?>
+        </div>
         </div>
 
         <div class="card">
@@ -87,6 +99,19 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
             <p style="color: #666; margin-bottom: 30px;">Bienvenido al Panel de Administración de MediFlow. Seleccione el módulo con el que desea operar:</p>
             
             <div class="modules-grid">
+                <?php if ($rolLimpio == 'paciente'): ?>
+                <a href="/mediflow/grupo-01/MediFlow/vista/credencial.php" class="module-button">
+                    <div class="icon-container" style="font-size: 28px;">🪪</div>
+                    <h4>Mi Credencial</h4>
+                    <p>Identificación digital para presentar en centros médicos.</p>
+                </a>
+                
+                <a href="/mediflow/grupo-01/MediFlow/vista/padron_solicitudes.php" class="module-button">
+                    <div class="icon-container" style="font-size: 28px;">📄</div>
+                    <h4>Mis Solicitudes</h4>
+                    <p>Consulta el historial y estado de tus trámites.</p>
+                </a>
+                <?php endif; ?>
                 
                 <a href="/mediflow/grupo-01/MediFlow/vista/pacientes.php" class="module-button">
                     <div class="icon-container">
