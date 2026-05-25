@@ -3,6 +3,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
+$rol = strtolower($_SESSION['usuario']['rol'] ?? '');
+
+if ($_POST['accion'] == 'crear' && !in_array($rol, ['admin','administrador'])) {
+    die("Sin permisos");
+}
 
 require_once __DIR__ . '/../../src/config.php'; 
 require_once __DIR__ . '/../modelo/Paciente.php';

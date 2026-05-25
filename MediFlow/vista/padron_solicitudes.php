@@ -1,63 +1,51 @@
+
 <?php
 session_start();
-$rol = $_SESSION['usuario']['rol'];
-$id_usuario = $_SESSION['usuario']['id']; // O como tengas guardado el ID del paciente
+if (!isset($_SESSION['usuario'])) { header("Location: login.php"); exit; }
 
-if ($rol == 'paciente') {
-    // El paciente solo ve las suyas
-    $sql = "SELECT * FROM solicitudes WHERE id_paciente = :id_usuario";
-} else {
-    // Médicos y Admins ven todas
-    $sql = "SELECT * FROM solicitudes";
-}
+$rol = $_SESSION['usuario']['rol'] ?? '';
+$email_usuario = $_SESSION['usuario']['email'] ?? '';
+$rolNormalizado = strtolower(trim($rol));
 
 require_once __DIR__ . '/../../src/config.php';
 require_once __DIR__ . '/../modelo/Solicitud.php';
 
 $solicitudModelo = new Solicitud($conexion);
-$solicitudes = $solicitudModelo->listar();
+
+if ($rolNormalizado == 'paciente') {
+    $solicitudes = $solicitudModelo->listarPorEmailPaciente($email_usuario);
+} else {
+    $solicitudes = $solicitudModelo->listar();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Padrón de Solicitudes</title>
+    <title>Padrón de Solicitudes - MediFlow</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
+        body { background-color: #f8fafc; font-family: 'Segoe UI', sans-serif; color: #333; }
         .container-ancho { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        
         .panel-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .panel-header { font-size: 20px; font-weight: 600; color: #0c4a6e; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Buscador Expandido */
         .search-container { position: relative; width: 400px; }
-        .search-input { width: 100%; padding: 10px 15px 10px 35px; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 14px; outline: none; transition: all 0.2s; box-sizing: border-box; }
-        .search-input:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
-        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-
-        .table-responsive { overflow-x: auto; }
+        .search-input { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 20px; outline: none; }
         .table-responsive table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
-        .table-responsive th { padding: 15px 12px; text-align: left; background-color: #f1f5f9; color: #475569; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
-        .table-responsive td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
-        .table-responsive tbody tr:hover { background-color: #f0f9ff; transition: background 0.2s; }
-        
-        .badge { text-transform: capitalize; font-weight: 600; padding: 5px 10px; border-radius: 20px; font-size: 12px; display: inline-block; text-align: center; }
+        .table-responsive th { padding: 15px 12px; background-color: #f1f5f9; text-align: left; border-bottom: 2px solid #e2e8f0; }
+        .table-responsive td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; }
+        .badge { font-weight: 600; padding: 5px 10px; border-radius: 20px; font-size: 12px; text-transform: capitalize; }
         .badge-pendiente { background: #fef08a; color: #854d0e; }
         .badge-observada { background: #fed7aa; color: #9a3412; }
         .badge-aprobada { background: #bbf7d0; color: #166534; }
         .badge-rechazada { background: #fecaca; color: #991b1b; }
-
-        /* Botones de acción */
-        .btn-icon { background: #f1f5f9; color: #0f172a; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-right: 5px; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center;}
-        .btn-icon:hover { background: #cbd5e1; }
-        .btn-evaluar { background-color: #0ea5e9; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; }
-        .btn-evaluar:hover { background-color: #0284c7; }
+        .btn-icon { background: #f1f5f9; color: #0f172a; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; }
+        .btn-print { background-color: #22c55e; color: white; margin-left: 5px;}
     </style>
 </head>
 <body>
     <div class="navbar">
-        <h1>MediFlow <span>• Padrón General de Solicitudes</span></h1>
+        <h1>MediFlow <span>• <?php echo ($rolNormalizado == 'paciente') ? 'Mis Solicitudes' : 'Padrón General'; ?></span></h1>
         <a href="../index.php" class="btn-back">Volver al Dashboard</a>
     </div>
 
@@ -65,88 +53,41 @@ $solicitudes = $solicitudModelo->listar();
         <div class="panel-box">
             <div class="panel-header">
                 Listado de Registros
-                <div class="search-container">
-                    <span class="search-icon">🔍</span>
-                    <!-- El buscador filtra ahora por DNI, Nombre o N° de Solicitud -->
-                    <input type="text" id="buscadorGlobal" class="search-input" placeholder="Buscar por N° Solicitud, DNI o Paciente...">
-                </div>
+                <div class="search-container"><input type="text" id="buscadorGlobal" class="search-input" placeholder="Buscar..."></div>
             </div>
-            
             <div class="table-responsive">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>N°</th>
-                            <th>Fecha</th>
-                            <th>Paciente</th>
-                            <th>DNI</th>
-                            <th>Práctica Principal</th>
-                            <th>Prioridad</th>
-                            <th>Estado</th>
-                            <th style="text-align: center;">Acciones</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>N°</th><th>Fecha</th><th>Paciente</th><th>DNI</th><th>Práctica</th><th>Prioridad</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody>
                         <?php if (empty($solicitudes)): ?>
-                            <tr><td colspan="8" style="text-align:center; padding: 30px; color: #64748b;">No hay solicitudes registradas en el sistema.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($solicitudes as $s): 
-                                $estadoNormalizado = strtolower(trim($s['estado']));
-                                
-                                $claseBadge = 'badge-pendiente';
-                                if($estadoNormalizado == 'observada') $claseBadge = 'badge-observada';
-                                if($estadoNormalizado == 'aprobada') $claseBadge = 'badge-aprobada';
-                                if($estadoNormalizado == 'rechazada') $claseBadge = 'badge-rechazada';
-                            ?>
+                            <tr><td colspan="8" style="text-align:center; padding: 30px;">No hay registros.</td></tr>
+                        <?php else: foreach ($solicitudes as $s): 
+                            $estado = strtolower(trim($s['estado']));
+                            $clase = 'badge-pendiente';
+                            if($estado == 'observada') $clase = 'badge-observada';
+                            if($estado == 'aprobada') $clase = 'badge-aprobada';
+                            if($estado == 'rechazada') $clase = 'badge-rechazada';
+                        ?>
                             <tr class="fila-dato">
-                                <td class="col-num"><strong>#<?php echo $s['id_solicitud']; ?></strong></td>
-                                <td><?php echo isset($s['fecha']) ? date("d/m/Y", strtotime($s['fecha'])) : date("d/m/Y"); ?></td>
-                                <td class="col-pac"><strong><?php echo htmlspecialchars($s['apellido_paciente'] . ', ' . $s['nombre_paciente']); ?></strong></td>
+                                <td class="col-num">#<?php echo $s['id_solicitud']; ?></td>
+                                <td><?php echo date("d/m/Y", strtotime($s['fecha'])); ?></td>
+                                <td class="col-pac"><?php echo htmlspecialchars($s['apellido_paciente'] . ', ' . $s['nombre_paciente']); ?></td>
                                 <td class="col-dni"><?php echo htmlspecialchars($s['dni'] ?? '---'); ?></td>
                                 <td><?php echo htmlspecialchars($s['nombre_practica'] ?? '---'); ?></td>
                                 <td><?php echo ucfirst($s['prioridad']); ?></td>
+                                <td><span class="badge <?php echo $clase; ?>"><?php echo htmlspecialchars($s['estado']); ?></span></td>
                                 <td>
-                                    <span class="badge <?php echo $claseBadge; ?>">
-                                        <?php echo htmlspecialchars($s['estado']); ?>
-                                    </span>
-                                </td>
-                                <td style="text-align: center; white-space: nowrap;">
-                                    <!-- Botón OJITO: Abre en nueva pestaña el detalle completo -->
-                                    <a href="ver_solicitud.php?id=<?php echo $s['id_solicitud']; ?>" target="_blank" class="btn-icon" title="Ver Detalles Completos">👁️ Ver</a>
-                                    
-                                    <?php if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin' || $rolNormalizado == 'administrador'): ?>
-                                        <?php if ($estadoNormalizado == 'pendiente' || $estadoNormalizado == 'observada'): ?>
-                                            <a href="evaluar.php?id=<?php echo $s['id_solicitud']; ?>" class="btn-evaluar">Evaluar</a>
-                                        <?php endif; ?>
+                                    <a href="ver_solicitud.php?id=<?php echo $s['id_solicitud']; ?>" target="_blank" class="btn-icon">👁️ Ver</a>
+                                    <?php if ($estado == 'aprobada'): ?>
+                                        <a href="imprimir_solicitud.php?id=<?php echo $s['id_solicitud']; ?>" target="_blank" class="btn-icon btn-print">🖨️ Orden</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        <?php endforeach; endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
-    <script>
-        // Buscador Global por N° Solicitud, DNI o Nombre de paciente
-        document.getElementById('buscadorGlobal').addEventListener('input', function() {
-            let filtro = this.value.toLowerCase().trim();
-            let filas = document.querySelectorAll('.fila-dato');
-            
-            filas.forEach(fila => {
-                let num = fila.querySelector('.col-num').textContent.toLowerCase();
-                let dni = fila.querySelector('.col-dni').textContent.toLowerCase();
-                let pac = fila.querySelector('.col-pac').textContent.toLowerCase();
-                
-                if (num.includes(filtro) || dni.includes(filtro) || pac.includes(filtro)) {
-                    fila.style.display = '';
-                } else {
-                    fila.style.display = 'none';
-                }
-            });
-        });
-    </script>
 </body>
 </html>

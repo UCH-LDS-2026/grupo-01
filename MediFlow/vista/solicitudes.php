@@ -74,8 +74,8 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
     </div>
 
     <div class="container-ancho">
-        <?php if ($rolNormalizado == 'medico' || $rolNormalizado == 'admin' || $rolNormalizado == 'administrador'): ?>
-        <div class="panel-box">
+<?php if ($rolNormalizado !== 'paciente'): ?>
+    <div class="panel-box">
             <div class="panel-header">Cargar Nueva Solicitud Médica</div>
             <form action="../controlador/solicitudControlador.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="accion" value="crear">
