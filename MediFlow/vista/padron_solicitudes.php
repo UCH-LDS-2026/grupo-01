@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if (!isset($_SESSION['usuario'])) { header("Location: login.php"); exit; }
@@ -53,7 +52,9 @@ if ($rolNormalizado == 'paciente') {
         <div class="panel-box">
             <div class="panel-header">
                 Listado de Registros
-                <div class="search-container"><input type="text" id="buscadorGlobal" class="search-input" placeholder="Buscar..."></div>
+                <div class="search-container">
+                    <input type="text" id="buscadorGlobal" class="search-input" placeholder="Ingrese Nombre, DNI o N° de orden">
+                </div>
             </div>
             <div class="table-responsive">
                 <table>
@@ -89,5 +90,24 @@ if ($rolNormalizado == 'paciente') {
             </div>
         </div>
     </div>
+
+    <script>
+        const buscadorSol = document.getElementById('buscadorGlobal');
+        if(buscadorSol) {
+            buscadorSol.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const filas = document.querySelectorAll('.fila-dato');
+
+                filas.forEach(fila => {
+                    const textoFila = fila.textContent.toLowerCase();
+                    if(textoFila.includes(query)) {
+                        fila.style.display = '';
+                    } else {
+                        fila.style.display = 'none';
+                    }
+                });
+            });
+        }
+    </script>
 </body>
 </html>

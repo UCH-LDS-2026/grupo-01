@@ -22,12 +22,12 @@ $observadas = $solicitudModelo->obtenerObservadasPorMedico($id_medico);
 <body>
     <div class="navbar">
         <h1>MediFlow <span>• Correcciones Solicitadas</span></h1>
-        <a href="../index.php" class="btn-back">⬅ Volver al Inicio</a>
+        <a href="../index.php" class="btn-back"> Volver al Inicio</a>
     </div>
 
     <div class="container-ancho">
         <div class="card">
-            <h2>⚠️ Solicitudes Devueltas por Auditoría</h2>
+            <h2> Solicitudes Devueltas por Auditoría</h2>
             <div class="table-responsive">
                 <table>
                     <thead>

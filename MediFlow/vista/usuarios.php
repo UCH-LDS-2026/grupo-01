@@ -31,6 +31,8 @@ $listaUsuarios = $usuarioModelo->listar();
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
         .badge { padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; text-transform: capitalize; background: #e0f2fe; color: #0369a1; }
         .btn-eliminar { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; }
+        /* Oculta los campos dinámicos por defecto */
+        .extra-field { display: none; }
     </style>
 </head>
 <body>
@@ -47,6 +49,7 @@ $listaUsuarios = $usuarioModelo->listar();
             <form action="../controlador/usuarioControlador.php" method="POST">
                 <input type="hidden" name="accion" value="crear">
                 <div class="form-grid">
+                    
                     <div class="form-group">
                         <label>Nombre</label>
                         <input type="text" name="nombre" required placeholder="Ej: Juan">
@@ -56,7 +59,7 @@ $listaUsuarios = $usuarioModelo->listar();
                         <input type="text" name="apellido" required placeholder="Ej: Pérez">
                     </div>
                     <div class="form-group">
-                        <label>Correo Electrónico (Login)</label>
+                        <label>Correo Electrónico</label>
                         <input type="email" name="email" required placeholder="juan@mediflow.com">
                     </div>
                     <div class="form-group">
@@ -65,7 +68,7 @@ $listaUsuarios = $usuarioModelo->listar();
                     </div>
                     <div class="form-group">
                         <label>Rol en el Sistema</label>
-                        <select name="rol" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
+                        <select name="rol" id="select-rol" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
                             <option value="">-- Seleccione un Rol --</option>
                             <option value="admin">Administrador</option>
                             <option value="administrativo">Administrativo</option>
@@ -74,6 +77,42 @@ $listaUsuarios = $usuarioModelo->listar();
                             <option value="paciente">Paciente (Afiliado)</option>
                         </select>
                     </div>
+
+                    <div class="form-group extra-field" data-rol="medico">
+                        <label>Matrícula</label>
+                        <input type="text" name="matricula" class="req-dinamico" placeholder="Ej: MN-112233">
+                    </div>
+                    <div class="form-group extra-field" data-rol="medico">
+                        <label>Especialidad</label>
+                        <input type="text" name="especialidad" class="req-dinamico" placeholder="Ej: Traumatología">
+                    </div>
+
+                    <div class="form-group extra-field" data-rol="auditor">
+                        <label>Sector</label>
+                        <input type="text" name="sector" class="req-dinamico" placeholder="Ej: Auditoría Central">
+                    </div>
+
+                    <div class="form-group extra-field" data-rol="paciente">
+                        <label>DNI</label>
+                        <input type="text" name="dni" class="req-dinamico" placeholder="Ej: 46866891">
+                    </div>
+                    <div class="form-group extra-field" data-rol="paciente">
+                        <label>Fecha de Nacimiento</label>
+                        <input type="date" name="fecha_nacimiento" class="req-dinamico">
+                    </div>
+                    <div class="form-group extra-field" data-rol="paciente">
+                        <label>Teléfono</label>
+                        <input type="text" name="telefono" placeholder="Ej: 2617158502">
+                    </div>
+                    <div class="form-group extra-field" data-rol="paciente">
+                        <label>Plan</label>
+                        <input type="text" name="plan" class="req-dinamico" placeholder="Ej: Plenitud 200">
+                    </div>
+                    <div class="form-group extra-field" data-rol="paciente">
+                        <label>N° Afiliado</label>
+                        <input type="text" name="nro_afiliado" class="req-dinamico" placeholder="Ej: F-00001-01">
+                    </div>
+
                     <div class="form-group">
                         <button type="submit" class="btn btn-submit" style="height: 40px;">Crear Usuario</button>
                     </div>
@@ -118,5 +157,32 @@ $listaUsuarios = $usuarioModelo->listar();
         </div>
 
     </div>
+
+    <script>
+        document.getElementById('select-rol').addEventListener('change', function() {
+            const selectedRol = this.value;
+            
+            // Recorremos todos los div ocultos "extra-field"
+            document.querySelectorAll('.extra-field').forEach(div => {
+                const input = div.querySelector('input');
+                
+                // Si el div corresponde al rol seleccionado, lo mostramos
+                if (div.getAttribute('data-rol') === selectedRol) {
+                    div.style.display = 'block';
+                    // Obligamos a rellenarlo solo a los que tienen la clase req-dinamico
+                    if(input && input.classList.contains('req-dinamico')) {
+                        input.required = true;
+                    }
+                } else {
+                    // Si no corresponde, lo ocultamos y limpiamos
+                    div.style.display = 'none';
+                    if(input) {
+                        input.required = false;
+                        input.value = ''; // Limpiamos para evitar basura en el envío
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

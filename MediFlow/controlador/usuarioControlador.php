@@ -28,11 +28,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion']) && $_POST['a
     $password = $_POST['password'] ?? ''; 
     $rol = $_POST['rol'] ?? '';
 
-    if ($usuarioModelo->crear($nombre, $apellido, $email, $password, $rol)) {
+    // Armamos un array con los campos extras dependiendo del rol
+    $extras = [];
+    if ($rol == 'medico') {
+        $extras['matricula'] = $_POST['matricula'] ?? '';
+        $extras['especialidad'] = $_POST['especialidad'] ?? '';
+    } elseif ($rol == 'auditor') {
+        $extras['sector'] = $_POST['sector'] ?? '';
+    } elseif ($rol == 'paciente') {
+        $extras['dni'] = $_POST['dni'] ?? '';
+        $extras['fecha_nacimiento'] = $_POST['fecha_nacimiento'] ?? '';
+        $extras['telefono'] = $_POST['telefono'] ?? '';
+        $extras['plan'] = $_POST['plan'] ?? '';
+        $extras['nro_afiliado'] = $_POST['nro_afiliado'] ?? '';
+    }
+
+    if ($usuarioModelo->crear($nombre, $apellido, $email, $password, $rol, $extras)) {
         header("Location: ../vista/usuarios.php");
         exit;
     } else {
-        echo " Error al crear el usuario. Es posible que el email ya exista.";
+        echo " Error al crear el usuario. Verifique que el correo, DNI, o Matrícula no estén duplicados.";
     }
 }
 ?>

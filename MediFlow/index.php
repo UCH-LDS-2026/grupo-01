@@ -134,7 +134,12 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
     <div style="display:flex; align-items:center; gap:15px;">
         <?php if ($rolLimpio == 'paciente'): ?>
             <a href="vista/notificaciones_paciente.php"
-               style="background:#f59e0b; color:white; padding:8px 12px; border-radius:50%; text-decoration:none;">
+               style="background:#f59e0b; color:white; padding:8px 12px; border-radius:50%; text-decoration:none;" title="Ver Notificaciones">
+               🔔
+            </a>
+        <?php elseif ($rolLimpio == 'medico'): ?>
+            <a href="vista/notificaciones.php"
+               style="background:#f59e0b; color:white; padding:8px 12px; border-radius:50%; text-decoration:none;" title="Ver Notificaciones">
                🔔
             </a>
         <?php endif; ?>
@@ -158,7 +163,6 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 
         <div class="profile-info">
             <p><strong>Email:</strong><br><?php echo htmlspecialchars($email); ?></p>
-            <p><strong>Entorno:</strong><br>Servidor Local (XAMPP)</p>
         </div>
 
         <div style="margin-top:20px;">
@@ -173,7 +177,7 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
                font-weight:600;
                box-shadow:0 4px 10px rgba(11,86,135,0.25);
                ">
-               ✏️ Editar Perfil
+                Editar Perfil
             </a>
         </div>
     </div>
@@ -212,7 +216,7 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
             <a href="/mediflow/grupo-01/MediFlow/vista/pacientes.php" class="module-button">
                 <div class="icon-container"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                 <h4>Gestión de Pacientes</h4>
-                <p>Alta, edición y padrón de afiliados.</p>
+                <p>Edición y padrón de afiliados.</p>
             </a>
             <?php endif; ?>
 
@@ -229,14 +233,6 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
                 <div class="icon-container"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
                 <h4>Dashboard Analítico</h4>
                 <p>Métricas, contadores y prioridades.</p>
-            </a>
-            <?php endif; ?>
-
-            <?php if ($rolLimpio == 'medico'): ?>
-            <a href="/mediflow/grupo-01/MediFlow/vista/notificaciones.php" class="module-button">
-                <div class="icon-container" style="font-size: 28px;">🔔</div>
-                <h4>Ver Notificaciones</h4>
-                <p>Solicitudes devueltas por auditoría.</p>
             </a>
             <?php endif; ?>
 
