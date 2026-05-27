@@ -14,10 +14,17 @@ class Solicitud {
     }
 
     public function listar() {
-        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, pr.nombre as nombre_practica, pr.descripcion as desc_practica 
+        // Hacemos JOIN con 'usuario' para el nombre y con 'medico' para la matrícula/especialidad
+        $sql = "SELECT s.*, 
+                       p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan,
+                       pr.nombre as nombre_practica, pr.descripcion as desc_practica,
+                       u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico, 
+                       m.especialidad as especialidad_medico, m.matricula as matricula_medico
                 FROM solicitud s
                 LEFT JOIN paciente p ON s.id_paciente = p.id_paciente
                 LEFT JOIN practica pr ON s.id_practica = pr.id_practica
+                LEFT JOIN usuario u_medico ON s.id_medico = u_medico.id_usuario 
+                LEFT JOIN medico m ON u_medico.id_usuario = m.id_usuario
                 ORDER BY s.id_solicitud DESC";
         $resultado = $this->conexion->query($sql);
         if ($resultado) {
@@ -67,8 +74,6 @@ class Solicitud {
         }
         return $stmt->execute();
     }
-
-    // --- FUNCIONES RESTAURADAS QUE SE HABÍAN BORRADO ---
     
     public function obtenerEstadisticas() {
         $sql = "SELECT 
@@ -81,22 +86,30 @@ class Solicitud {
     }
 
     public function obtenerPendientesDashboard() {
-        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente 
+        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente,
+                       u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico
                 FROM solicitud s
                 LEFT JOIN paciente p ON s.id_paciente = p.id_paciente
+                LEFT JOIN usuario u_medico ON s.id_medico = u_medico.id_usuario
                 WHERE LOWER(TRIM(s.estado)) = 'pendiente'
                 ORDER BY FIELD(s.prioridad, 'alta', 'media', 'baja'), s.fecha ASC LIMIT 10";
         $resultado = $this->conexion->query($sql);
         return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
     }
 
-    // --- NUEVAS FUNCIONES PARA EL PORTAL DEL PACIENTE ---
+    // --- FUNCIONES PARA EL PORTAL DEL PACIENTE ---
 
     public function listarPorEmailPaciente($email) {
-        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, pr.nombre as nombre_practica, pr.descripcion as desc_practica 
+        $sql = "SELECT s.*, 
+                       p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan,
+                       pr.nombre as nombre_practica, pr.descripcion as desc_practica,
+                       u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico, 
+                       m.especialidad as especialidad_medico, m.matricula as matricula_medico
                 FROM solicitud s
                 INNER JOIN paciente p ON s.id_paciente = p.id_paciente
                 LEFT JOIN practica pr ON s.id_practica = pr.id_practica
+                LEFT JOIN usuario u_medico ON s.id_medico = u_medico.id_usuario
+                LEFT JOIN medico m ON u_medico.id_usuario = m.id_usuario
                 WHERE p.email = ?
                 ORDER BY s.id_solicitud DESC";
         $stmt = $this->conexion->prepare($sql);
