@@ -1,0 +1,249 @@
+/* ==========================================================================
+   MEDIFLOW - HOJA DE ESTILOS INSTITUCIONAL (CSS GLOBAL)
+   ========================================================================== */
+
+/* 1. Estilos Generales y Tipografía */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* 2. Barra de Navegación / Encabezado Superior */
+.navbar {
+    background-color: #0b5687;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar h1 span {
+    color: #4fc3f7;
+}
+
+/* 3. Botones de Navegación del Navbar (Volver / Cerrar Sesión) */
+.btn-back {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 15px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.btn-logout {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 15px;
+    border: 1px solid #ef5350;
+    background-color: #ef5350;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background-color: #d32f2f;
+}
+
+/* 4. Estructuras de Contenedores y Tarjetas (Cards) */
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Grid de dos columnas (Útil para formularios al lado de tablas) */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+}
+
+@media (max-width: 850px) {
+    .grid-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 25px;
+    border-top: 4px solid #0b5687;
+    height: fit-content;
+}
+
+.card h2 {
+    margin-top: 0;
+    color: #0b5687;
+    font-size: 20px;
+    border-bottom: 2px solid #f4f7f9;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* 5. Formularios y Elementos de Entrada */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #0b5687;
+    outline: none;
+    box-shadow: 0 0 5px rgba(11, 86, 135, 0.2);
+}
+
+/* 6. Botones de Acción Internos */
+button, .btn {
+    cursor: pointer;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.btn-submit {
+    background-color: #0b5687;
+    color: white;
+    width: 100%;
+}
+
+.btn-submit:hover {
+    background-color: #083f63;
+}
+
+.btn-cancel {
+    background-color: #e0e0e0;
+    color: #333;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.btn-cancel:hover {
+    background-color: #d5d5d5;
+}
+
+/* 7. Buscadores y Filtros */
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    flex-grow: 1;
+}
+
+.btn-search {
+    background-color: #26a69a;
+    color: white;
+}
+
+.btn-search:hover {
+    background-color: #1f897f;
+}
+
+.btn-clear {
+    background-color: #78909c;
+    color: white;
+}
+
+.btn-clear:hover {
+    background-color: #607d8b;
+}
+
+/* 8. Tablas Estilizadas */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+th {
+    background-color: #f4f7f9;
+    color: #555;
+    text-align: left;
+    padding: 12px 15px;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+}
+
+tr:hover td {
+    background-color: #fafdff;
+}
+
+.btn-table-action {
+    color: #0b5687;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-table-action:hover {
+    text-decoration: underline;
+}
+
+.no-data {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 30px;
+}
