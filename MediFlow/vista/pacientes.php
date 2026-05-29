@@ -19,6 +19,12 @@ $esEdicion = false;
 $pacienteAEditar = null;
 
 if (isset($_GET['editar'])) {
+    // BLOQUEO DE SEGURIDAD: Si es auditor e intenta editar por URL, lo redirigimos al padrón
+    if ($rol == 'auditor') {
+        header("Location: pacientes.php");
+        exit;
+    }
+    
     $esEdicion = true;
     $pacienteAEditar = $pacienteModelo->buscarPorId($_GET['editar']);
 }
@@ -104,7 +110,7 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
 <?php if (!$esEdicion): ?>
 <div class="top-controls">
     <div class="search-form">
-        <input type="text" id="buscadorPacientes" class="search-input" placeholder="Ingrese Nombre o DNI">
+        <input type="text" id="buscadorPacientes" class="search-input" placeholder=" Escribe para filtrar por DNI, Nombre, Apellido, Email...">
     </div>
 </div>
 <?php endif; ?>
@@ -116,12 +122,12 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
         echo " Modificar Paciente";
         echo " <a href='pacientes.php' style='float:right; font-size:14px; text-decoration:none; color:#ef4444;'>Cancelar Edición</a>";
     } else {
-        echo " Alta Paciente";
+        echo "Alta Paciente";
     }
     ?>
     </h2>
 
-    <?php if ($rol == 'admin' || $esEdicion): ?>
+    <?php if ($rol == 'admin' || ($esEdicion && $rol != 'auditor')): ?>
     <form action="../controlador/pacienteControlador.php" method="POST">
         <input type="hidden" name="accion" value="<?php echo $esEdicion ? 'editar' : 'crear'; ?>">
         <?php if ($esEdicion): ?>
@@ -175,7 +181,7 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
         </div>
     </form>
     <?php else: ?>
-        <p style="color:red;">No tenés permisos para dar de alta pacientes.</p>
+        <p style="color:red;">Tu rol de <?php echo ucfirst($rol); ?> no tiene permisos para dar de alta o editar información clínica del paciente.</p>
     <?php endif; ?>
 </div>
 
@@ -190,7 +196,10 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
                 <th style="padding:10px; border-bottom:1px solid #cbd5e1;">DNI</th>
                 <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Email</th>
                 <th style="padding:10px; border-bottom:1px solid #cbd5e1;">Teléfono</th>
-                <th style="padding:10px; border-bottom:1px solid #cbd5e1; text-align:center;">Acción</th>
+                
+                <?php if ($rol != 'auditor'): ?>
+                    <th style="padding:10px; border-bottom:1px solid #cbd5e1; text-align:center;">Acción</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody id="tablaPacientes">
@@ -204,9 +213,12 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9;"><?php echo htmlspecialchars($p['dni']); ?></td>
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9;"><?php echo htmlspecialchars($p['email']); ?></td>
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9;"><?php echo htmlspecialchars($p['telefono']); ?></td>
+                    
+                    <?php if ($rol != 'auditor'): ?>
                     <td style="padding:10px; border-bottom:1px solid #f1f5f9; text-align:center;">
                         <a href="pacientes.php?editar=<?php echo $p['id_paciente']; ?>" class="btn-modificar">Modificar</a>
                     </td>
+                    <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

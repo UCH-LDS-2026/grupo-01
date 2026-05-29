@@ -10,11 +10,55 @@ class Solicitud {
         $sql = "INSERT INTO solicitud (id_medico, id_paciente, id_practica, fecha, diagnostico, prioridad, ruta_archivo, estado) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')";
         $stmt = $this->conexion->prepare($sql);
         $stmt->bind_param("iiissss", $id_medico, $id_paciente, $id_practica, $fecha, $diagnostico, $prioridad, $ruta_archivo);
+        
+        if ($stmt->execute()) {
+            return $this->conexion->insert_id; // Devolvemos el ID generado para vincular los archivos
+        }
+        return false;
+    }
+
+    // NUEVO: Guarda en la tabla 'archivo'
+    public function guardarArchivo($id_solicitud, $nombre, $tipo, $ruta) {
+        $sql = "INSERT INTO archivo (id_solicitud, nombre, tipo, ruta) VALUES (?, ?, ?, ?)";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("isss", $id_solicitud, $nombre, $tipo, $ruta);
         return $stmt->execute();
     }
 
+    // NUEVO: Recupera de la tabla 'archivo'
+    public function obtenerArchivos($id_solicitud) {
+        $sql = "SELECT * FROM archivo WHERE id_solicitud = ?";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("i", $id_solicitud);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // NUEVO: Auditor evalúa la solicitud
+    public function evaluar($id_solicitud, $id_auditor, $estado_nuevo, $observaciones) {
+        $this->conexion->begin_transaction();
+        try {
+            // 1. Actualiza el estado principal
+            $sql1 = "UPDATE solicitud SET estado = ? WHERE id_solicitud = ?";
+            $stmt1 = $this->conexion->prepare($sql1);
+            $stmt1->bind_param("si", $estado_nuevo, $id_solicitud);
+            $stmt1->execute();
+
+            // 2. Guarda el registro en la tabla evaluacion
+            $sql2 = "INSERT INTO evaluacion (id_solicitud, id_auditor, estado_nuevo, observaciones) VALUES (?, ?, ?, ?)";
+            $stmt2 = $this->conexion->prepare($sql2);
+            $stmt2->bind_param("iiss", $id_solicitud, $id_auditor, $estado_nuevo, $observaciones);
+            $stmt2->execute();
+
+            $this->conexion->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conexion->rollback();
+            return false;
+        }
+    }
+
     public function listar() {
-        // Hacemos JOIN con 'usuario' para el nombre y con 'medico' para la matrícula/especialidad
         $sql = "SELECT s.*, 
                        p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan,
                        pr.nombre as nombre_practica, pr.descripcion as desc_practica,
@@ -62,7 +106,7 @@ class Solicitud {
         return $stmt->get_result()->fetch_assoc();
     }
 
-   public function corregir($id_solicitud, $id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico, $ruta_archivo = null) {
+    public function corregir($id_solicitud, $id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico, $ruta_archivo = null) {
         if ($ruta_archivo) {
             $sql = "UPDATE solicitud SET id_paciente = ?, id_medico = ?, id_practica = ?, fecha = ?, prioridad = ?, diagnostico = ?, ruta_archivo = ?, estado = 'pendiente' WHERE id_solicitud = ?";
             $stmt = $this->conexion->prepare($sql);
@@ -85,20 +129,61 @@ class Solicitud {
         return $resultado->fetch_assoc();
     }
 
-    public function obtenerPendientesDashboard() {
-        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente,
-                       u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico
+   public function obtenerPendientesFiltradas($filtros = []) {
+        // CORRECCIÓN: Agregamos p.dni a la selección
+        $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni,
+                       u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico,
+                       pr.nombre as nombre_practica
                 FROM solicitud s
                 LEFT JOIN paciente p ON s.id_paciente = p.id_paciente
                 LEFT JOIN usuario u_medico ON s.id_medico = u_medico.id_usuario
-                WHERE LOWER(TRIM(s.estado)) = 'pendiente'
-                ORDER BY FIELD(s.prioridad, 'alta', 'media', 'baja'), s.fecha ASC LIMIT 10";
+                LEFT JOIN practica pr ON s.id_practica = pr.id_practica
+                WHERE 1=1 ";
+        
+        $params = [];
+        $types = "";
+
+        if (!empty($filtros['estado'])) {
+            $sql .= " AND LOWER(TRIM(s.estado)) = ? ";
+            $types .= "s";
+            $params[] = strtolower(trim($filtros['estado']));
+        }
+        if (!empty($filtros['fecha_desde'])) {
+            $sql .= " AND DATE(s.fecha) >= ? ";
+            $types .= "s";
+            $params[] = $filtros['fecha_desde'];
+        }
+        if (!empty($filtros['fecha_hasta'])) {
+            $sql .= " AND DATE(s.fecha) <= ? ";
+            $types .= "s";
+            $params[] = $filtros['fecha_hasta'];
+        }
+        if (!empty($filtros['id_practica'])) {
+            $sql .= " AND s.id_practica = ? ";
+            $types .= "i";
+            $params[] = $filtros['id_practica'];
+        }
+        if (!empty($filtros['paciente'])) {
+            $sql .= " AND (p.nombre LIKE ? OR p.apellido LIKE ? OR p.dni LIKE ?) ";
+            $types .= "sss";
+            $like = "%" . $filtros['paciente'] . "%";
+            $params[] = $like; $params[] = $like; $params[] = $like;
+        }
+
+        $sql .= " ORDER BY FIELD(s.prioridad, 'alta', 'media', 'baja'), s.fecha ASC LIMIT 100";
+
+        $stmt = $this->conexion->prepare($sql);
+        if (!empty($params)) { $stmt->bind_param($types, ...$params); }
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    public function contarPendientes() {
+        $sql = "SELECT COUNT(*) as total FROM solicitud WHERE estado = 'pendiente'";
         $resultado = $this->conexion->query($sql);
-        return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+        return $resultado->fetch_assoc()['total'] ?? 0;
     }
 
     // --- FUNCIONES PARA EL PORTAL DEL PACIENTE ---
-
     public function listarPorEmailPaciente($email) {
         $sql = "SELECT s.*, 
                        p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan,
@@ -141,5 +226,6 @@ class Solicitud {
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
     }
+    
 }
 ?>

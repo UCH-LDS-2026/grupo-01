@@ -11,6 +11,28 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
     $rol = $usuario['rol'] ?? 'Sin rol';
 
     $rolLimpio = strtolower(str_replace(['é','É'], ['e','E'], trim($rol)));
+    
+    // Contamos las notificaciones dependiendo del rol
+    $notificaciones_medico = 0;
+    $notificaciones_auditor = 0;
+    
+    if ($rolLimpio == 'medico' || $rolLimpio == 'auditor') {
+        require_once __DIR__ . '/../src/config.php';
+        
+        if ($rolLimpio == 'medico') {
+            $id_usuario = $usuario['id_usuario'];
+            $stmt = $conexion->prepare("SELECT COUNT(*) as total FROM solicitud WHERE id_medico = ? AND LOWER(TRIM(estado)) = 'observada'");
+            $stmt->bind_param("i", $id_usuario);
+            $stmt->execute();
+            $notificaciones_medico = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+        } 
+        elseif ($rolLimpio == 'auditor') {
+            $stmt = $conexion->prepare("SELECT COUNT(*) as total FROM solicitud WHERE LOWER(TRIM(estado)) = 'pendiente'");
+            $stmt->execute();
+            $notificaciones_auditor = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+        }
+    }
+
 } else {
     session_destroy();
     header("Location: /mediflow/grupo-01/MediFlow/vista/login.php");
@@ -123,6 +145,10 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
     font-size: 13px;
     line-height: 1.4;
 }
+
+/* Estilo para el puntito de notificación */
+.notif-container { position: relative; display: inline-block; cursor:pointer; }
+.notif-dot { position: absolute; top: -5px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; border: 2px solid #0b5687; }
 </style>
 </head>
 
@@ -131,16 +157,27 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 <div class="navbar">
     <h1>MediFlow <span>• Obra Social</span></h1>
 
-    <div style="display:flex; align-items:center; gap:15px;">
+    <div style="display:flex; align-items:center; gap:20px;">
         <?php if ($rolLimpio == 'paciente'): ?>
             <a href="vista/notificaciones_paciente.php"
                style="background:#f59e0b; color:white; padding:8px 12px; border-radius:50%; text-decoration:none;" title="Ver Notificaciones">
                🔔
             </a>
         <?php elseif ($rolLimpio == 'medico'): ?>
-            <a href="vista/notificaciones.php"
+            <a href="vista/notificaciones.php" class="notif-container"
                style="background:#f59e0b; color:white; padding:8px 12px; border-radius:50%; text-decoration:none;" title="Ver Notificaciones">
                🔔
+               <?php if ($notificaciones_medico > 0): ?>
+                   <span class="notif-dot" style="border:none; box-shadow:none;"><?php echo $notificaciones_medico; ?></span>
+               <?php endif; ?>
+            </a>
+        <?php elseif ($rolLimpio == 'auditor'): ?>
+            <a href="vista/dashboard.php" class="notif-container"
+               style="background:#f59e0b; color:white; padding:8px 12px; border-radius:50%; text-decoration:none;" title="Ver Solicitudes Pendientes">
+               🔔
+               <?php if ($notificaciones_auditor > 0): ?>
+                   <span class="notif-dot" style="border:none; box-shadow:none;"><?php echo $notificaciones_auditor; ?></span>
+               <?php endif; ?>
             </a>
         <?php endif; ?>
 
@@ -184,7 +221,7 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 
     <div class="card">
         <h2 style="margin-top:0; color:#0b5687; font-size:26px;">¡Hola, <?php echo htmlspecialchars($nombre); ?>!</h2>
-        <p style="color: #666; margin-bottom: 30px;">Seleccione el módulo con el que desea operar:</p>
+        <p style="color: #666; margin-bottom: 30px;"></p>
 
         <div class="modules-grid">
 
@@ -196,15 +233,15 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
             </a>
             <?php endif; ?>
 
-            <?php if ($rolLimpio != 'paciente'): ?>
+            <?php if ($rolLimpio == 'medico' || $rolLimpio == 'admin' ): ?>
             <a href="/mediflow/grupo-01/MediFlow/vista/solicitudes.php" class="module-button">
                 <div class="icon-container"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
                 <h4>Gestión de Solicitudes</h4>
-                <p>Carga y consulta de solicitudes médicas.</p>
+                <p>Carga de solicitudes médicas.</p>
             </a>
             <?php endif; ?>
 
-            <?php if (in_array($rolLimpio, ['admin','administrador','medico','paciente'])): ?>
+            <?php if (in_array($rolLimpio, ['admin','administrador','medico','paciente','auditor'])): ?>
             <a href="/mediflow/grupo-01/MediFlow/vista/padron_solicitudes.php" class="module-button">
                 <div class="icon-container"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg></div>
                 <h4><?php echo ($rolLimpio == 'paciente') ? 'Mis Solicitudes' : 'Padrón de Solicitudes'; ?></h4>
@@ -212,7 +249,7 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
             </a>
             <?php endif; ?>
 
-            <?php if ($rolLimpio != 'paciente'): ?>
+            <?php if ($rolLimpio == 'admin' ||$rolLimpio == 'medico' || $rolLimpio == 'administrador'): ?>
             <a href="/mediflow/grupo-01/MediFlow/vista/pacientes.php" class="module-button">
                 <div class="icon-container"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                 <h4>Gestión de Pacientes</h4>

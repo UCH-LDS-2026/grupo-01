@@ -50,7 +50,7 @@ $observadas = $solicitudModelo->obtenerObservadasPorMedico($id_medico);
                                         "<?php echo htmlspecialchars($obs['motivo_correccion'] ?? 'No se especificaron observaciones adicionales.'); ?>"
                                     </td>
                                     <td style="text-align: center;">
-                                        <a href="corregir.php?id=<?php echo $obs['id_solicitud']; ?>" class="btn-observar" style="background-color: #f59e0b; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold;">Corregir Solicitud</a>
+                                        <a href="ver_solicitud.php?id=<?php echo $obs['id_solicitud']; ?>" target="_blank" class="btn-observar" style="background-color: #f59e0b; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold;">Corregir Solicitud</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

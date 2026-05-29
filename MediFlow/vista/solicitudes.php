@@ -74,8 +74,8 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
     </div>
 
     <div class="container-ancho">
-<?php if ($rolNormalizado !== 'paciente'): ?>
-    <div class="panel-box">
+        <?php if ($rolNormalizado != 'paciente' && $rolNormalizado != 'auditor'): ?>
+        <div class="panel-box">
             <div class="panel-header">Cargar Nueva Solicitud Médica</div>
             <form action="../controlador/solicitudControlador.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="accion" value="crear">
@@ -147,7 +147,6 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
                         <div class="char-counter"><span id="charCount">0</span> / 1000 caracteres</div>
                     </div>
 
-                    <!-- Drag & Drop Zone Múltiple -->
                     <div class="form-col full-width">
                         <label>Estudios / Recetas Adjuntas (Opcional)</label>
                         <div class="drop-zone" id="drop-zone">
@@ -155,7 +154,6 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
                                 📥 Arrastra tus archivos aquí o haz clic para examinar
                                 <span style="display:block; font-size:12px; color:#94a3b8; margin-top:5px;">Formatos: JPG, PNG, PDF. <b>Puedes subir varios archivos.</b></span>
                             </span>
-                            <!-- Importante: atributo name[] y multiple -->
                             <input type="file" name="adjuntos[]" id="archivo" class="drop-zone__input" accept=".jpg,.jpeg,.png,.pdf" multiple>
                             <div class="preview-container" id="previewContainer"></div>
                         </div>
@@ -165,6 +163,11 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
                 <button type="submit" class="btn-cargar">Registrar Solicitud en la Obra Social</button>
             </form>
         </div>
+        <?php else: ?>
+        <div class="panel-box">
+            <h3 style="color:#64748b; text-align:center;">Módulo de carga de solicitudes.</h3>
+            <p style="text-align:center; color:#94a3b8;">Tu rol actual (<?php echo ucfirst($rolNormalizado); ?>) no tiene permisos para cargar nuevas solicitudes.</p>
+        </div>
         <?php endif; ?>
     </div>
 
@@ -172,11 +175,13 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
         // --- Lógica Textarea Autoexpandible ---
         const tx = document.getElementById('diagnosticoTextArea');
         const charCount = document.getElementById('charCount');
-        tx.addEventListener("input", function() {
-            this.style.height = "auto";
-            this.style.height = this.scrollHeight + "px";
-            charCount.textContent = this.value.length;
-        });
+        if(tx) {
+            tx.addEventListener("input", function() {
+                this.style.height = "auto";
+                this.style.height = this.scrollHeight + "px";
+                charCount.textContent = this.value.length;
+            });
+        }
 
         function renderFichaData(dataJson, gridElement, cardElement, idAExcluir) {
             gridElement.innerHTML = '';
@@ -193,6 +198,8 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
         // --- Lógica Dropdowns (Paciente y Práctica) ---
         const setupDropdown = (inputId, hiddenId, dropdownId, optionsClass, cardId, gridId, idField) => {
             const input = document.getElementById(inputId);
+            if(!input) return; // Si no hay formulario (por permisos), no rompe el JS
+            
             const hidden = document.getElementById(hiddenId);
             const dropdown = document.getElementById(dropdownId);
             const options = document.querySelectorAll(optionsClass);
@@ -235,46 +242,45 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
         const previewContainer = document.getElementById("previewContainer");
         const dropPrompt = document.getElementById("dropPrompt");
         
-        let dataTransfer = new DataTransfer(); // Contenedor dinámico de archivos
+        let dataTransfer = new DataTransfer(); 
 
-        dropZoneElement.addEventListener("click", (e) => {
-            // Evitar que el click en el botón "X" abra la ventana de archivos
-            if(e.target.closest('.btn-quitar-item')) return;
-            inputElement.click();
-        });
+        if(dropZoneElement) {
+            dropZoneElement.addEventListener("click", (e) => {
+                if(e.target.closest('.btn-quitar-item')) return;
+                inputElement.click();
+            });
 
-        inputElement.addEventListener("change", () => {
-            if (inputElement.files.length) procesarArchivos(inputElement.files);
-        });
+            inputElement.addEventListener("change", () => {
+                if (inputElement.files.length) procesarArchivos(inputElement.files);
+            });
 
-        dropZoneElement.addEventListener("dragover", (e) => {
-            e.preventDefault(); dropZoneElement.classList.add("drop-zone--over");
-        });
+            dropZoneElement.addEventListener("dragover", (e) => {
+                e.preventDefault(); dropZoneElement.classList.add("drop-zone--over");
+            });
 
-        ["dragleave", "dragend"].forEach(type => {
-            dropZoneElement.addEventListener(type, () => dropZoneElement.classList.remove("drop-zone--over"));
-        });
+            ["dragleave", "dragend"].forEach(type => {
+                dropZoneElement.addEventListener(type, () => dropZoneElement.classList.remove("drop-zone--over"));
+            });
 
-        dropZoneElement.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropZoneElement.classList.remove("drop-zone--over");
-            if (e.dataTransfer.files.length) procesarArchivos(e.dataTransfer.files);
-        });
+            dropZoneElement.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropZoneElement.classList.remove("drop-zone--over");
+                if (e.dataTransfer.files.length) procesarArchivos(e.dataTransfer.files);
+            });
+        }
 
         function procesarArchivos(files) {
-            // Añadir nuevos archivos al DataTransfer
             Array.from(files).forEach(file => dataTransfer.items.add(file));
-            
-            // Actualizar el input real
             inputElement.files = dataTransfer.files;
             actualizarVistaPrevia();
         }
 
-        function actualizarVistaPrevia() {
+function actualizarVistaPrevia() {
             previewContainer.innerHTML = "";
             
             if (dataTransfer.files.length > 0) {
-                dropPrompt.style.display = "none";
+                // CAMBIO: Ahora NO ocultamos el texto, solo cambiamos el estilo de la caja
+                dropPrompt.style.display = "block"; // Se mantiene visible
                 dropZoneElement.style.borderColor = "#10b981";
                 dropZoneElement.style.backgroundColor = "#f0fdf4";
             } else {
@@ -325,13 +331,12 @@ $practicas = $conexion->query("SELECT * FROM practica")->fetch_all(MYSQLI_ASSOC)
             const dtNuevo = new DataTransfer();
             const files = inputElement.files;
             
-            // Copiar todos los archivos excepto el eliminado
             for (let i = 0; i < files.length; i++) {
                 if (i !== index) dtNuevo.items.add(files[i]);
             }
             
             inputElement.files = dtNuevo.files;
-            dataTransfer = dtNuevo; // Sincronizar nuestro contenedor
+            dataTransfer = dtNuevo;
             actualizarVistaPrevia();
         }
     </script>
