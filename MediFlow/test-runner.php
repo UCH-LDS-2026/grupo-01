@@ -12,7 +12,7 @@ echo "════════════════════════�
 echo "\n";
 
 // Ejecutar PHPUnit SIN --testdox para obtener errores completos
-$output = shell_exec('C:\xampp\php\php.exe phpunit tests/ --configuration phpunit.xml 2>&1');
+$output = shell_exec('php vendor/bin/phpunit tests/Unit --configuration phpunit.xml 2>&1');
 
 // Extraer información de estadísticas
 preg_match('/Tests: (\d+)/', $output, $testsMatch);
@@ -75,7 +75,7 @@ if (!empty($failureBlock)) {
 }
 
 // Mostrar tests por clase (de la salida de testdox)
-$testdoxOutput = shell_exec('C:\xampp\php\php.exe phpunit tests/ --configuration phpunit.xml --testdox 2>&1');
+$testdoxOutput = shell_exec('php vendor/bin/phpunit tests/Unit --configuration phpunit.xml --testdox 2>&1');
 $testdoxLines = explode("\n", $testdoxOutput);
 
 foreach ($testdoxLines as $line) {
@@ -127,7 +127,7 @@ if (!empty($failureDetails)) {
             $lines_detail = explode("\n", $failure['details']);
             for ($i = 1; $i < min(5, count($lines_detail)); $i++) {
                 $detailLine = trim($lines_detail[$i]);
-                if (!empty($detailLine) && !preg_match('/^C:\\/', $detailLine)) {
+                if (!empty($detailLine) && !preg_match('/^C:\\\\/', $detailLine)) {
                     echo "   💥 " . $detailLine . "\n";
                 }
             }
