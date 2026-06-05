@@ -172,4 +172,4 @@ Gracias a esta separación, el sistema mantiene una estructura modular y escalab
 
 --
 
-git clone <URL_DEL_REPO>
+git clone <http://localhost/MediFlow/grupo-01/MediFlow/vista/login.php>
