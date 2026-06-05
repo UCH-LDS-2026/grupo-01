@@ -50,9 +50,79 @@ El sistema optimiza las evaluaciones, prioriza casos urgentes y brinda seguimien
 ---
 
 ## Cómo ejecutar el proyecto
+Para ejecutar el sistema MediFlow en tu entorno local, es necesario contar con un servidor web y un motor de base de datos. Recomendamos utilizar **XAMPP**.
 
-1.Clonar el repositorio:
-```bash
+### 1. Preparación del Entorno (Instalación de XAMPP)
+1. Descargá XAMPP desde su [página oficial](https://www.apachefriends.org/es/index.html) (recomendamos la versión con PHP 8.x).
+2. Instalalo manteniendo las opciones por defecto (asegurate de que **Apache** y **MySQL** estén seleccionados).
+3. Abrí el "XAMPP Control Panel".
+4. Iniciá los módulos haciendo clic en el botón **Start** al lado de `Apache` y `MySQL`. Ambos deben quedar resaltados en color verde.
+
+### 2. Clonar el repositorio
+1. Abrí la consola (Terminal, CMD o PowerShell).
+2. Navegá hasta la carpeta `htdocs` dentro de la instalación de XAMPP. Por lo general, en Windows el comando es:
+   ```bash
+   cd C:\xampp\htdocs
+
+### 3.Ejecuta elcomando para descargar el proyecto en tu computadora:
+git clone [https://github.com/UCH-LDS-2026/grupo-01.git](https://github.com/UCH-LDS-2026/grupo-01.git)
+
+### 4.Ingresar a la carpeta principal del proyecto
+cd grupo_01
+
+### 5.Configurar la BD
+sistema requiere una base de datos MySQL estructurada para funcionar.
+
+1. En tu navegador web, ingresá a http://localhost/phpmyadmin/.
+
+2. Hacé clic en la pestaña Bases de datos en la barra superior.
+
+3. En el campo "Nombre de la base de datos", escribí mediflow y hacé clic en Crear.
+
+4. Seleccioná la base de datos mediflow recién creada en el panel izquierdo.
+
+5. Andá a la pestaña Importar (en la barra superior).
+
+6. Hacé clic en Seleccionar archivo (o "Choose file").
+
+7. Buscá dentro de la carpeta de tu proyecto local (C:\xampp\htdocs\grupo-01) el archivo schema.sql (o el archivo de exportación de tu BD) y seleccionalo.
+
+8. Desplazate hacia abajo y hacé clic en Importar o Continuar.
+
+### 6.Configurar Permisos (Subir archivos)
+El sistema permite la subida de recetas y estudios médicos.
+
+1. Asegurate de que dentro de la carpeta MediFlow/ exista una carpeta llamada uploads/.
+
+2. Si no existe, creala manualmente de forma que la ruta quede así: C:\xampp\htdocs\grupo-01\MediFlow\uploads.
+
+### 7.Ejecutar la aplicacion
+Abrí tu navegador web.
+
+1. Ingresá a la siguiente dirección para iniciar 
+2. sesión en el sistema: http://localhost/grupo-01/MediFlow/vista/login.php
+
+### 8.Ejecucion de Tests Unitarios:
+incluye pruebas unitarias para validar la lógica de negocio. Para ejecutarlo debemos hacer:
+
+1. Instalación de Dependencias
+-Si no tenés Composer, instalalo desde getcomposer.org.
+
+-Asegurate de tener activada la extensión ZIP en XAMPP:
+
+En el panel de XAMPP, andá a Config > PHP (php.ini).
+
+Buscá la línea ;extension=zip y quitale el punto y coma inicial para que quede extension=zip.
+
+Guardá el archivo y reiniciá Apache.
+
+-Abrí la terminal dentro de la carpeta del proyecto (grupo-01/) y ejecutá: composer require --dev phpunit/phpunit
+
+2. Correr las Pruebas
+Para ejecutar las pruebas en la consola (Windows PowerShell/CMD), utilizá el siguiente comando:.\vendor\bin\phpunit tests\
+
+3. Generar el Reporte (Entregable)
+Para guardar el resultado de los tests en un archivo de texto dentro de la carpeta docs/: .\vendor\bin\phpunit tests\ > docs\reporte_tests.txt
 
 ## Arquitectura MVC
 

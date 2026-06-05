@@ -189,6 +189,12 @@ if (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
 </div>
 
 <div class="container grid-inicio">
+<?php if (isset($_GET['exito']) && $_GET['exito'] == 'carga_ok'): ?>
+        <div id="notificacionExito" style="grid-column: 1 / -1; background-color: #10b981; color: white; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: -10px; position: relative;">
+             ¡La solicitud médica fue cargada con éxito!
+            <span onclick="document.getElementById('notificacionExito').style.display='none'" style="position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 16px; opacity: 0.8; transition: 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">✖</span>
+        </div>
+    <?php endif; ?>
 
     <div class="card profile-card">
         <div class="avatar">

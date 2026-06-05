@@ -42,8 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
                         }
                     }
                 }
-                header("Location: ../vista/solicitudes.php?exito=1"); 
-                exit;
+            header("Location: ../index.php?exito=carga_ok");                exit;
             }
         } else {
             echo "❌ Error: Faltan completar campos obligatorios.";

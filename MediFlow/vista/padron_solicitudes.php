@@ -4,6 +4,7 @@ if (!isset($_SESSION['usuario'])) { header("Location: login.php"); exit; }
 
 $rol = $_SESSION['usuario']['rol'] ?? '';
 $email_usuario = $_SESSION['usuario']['email'] ?? '';
+$id_usuario_actual = $_SESSION['usuario']['id_usuario'] ?? 0; // Agregamos el ID
 $rolNormalizado = strtolower(trim($rol));
 
 require_once __DIR__ . '/../../src/config.php';
@@ -27,7 +28,7 @@ if ($rolNormalizado == 'paciente') {
         body { background-color: #f8fafc; font-family: 'Segoe UI', sans-serif; color: #333; }
         .container-ancho { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .panel-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .panel-header { font-size: 20px; font-weight: 600; color: #0c4a6e; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .panel-header { font-size: 20px; font-weight: 600; color: #0c4a6e; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;}
         .search-container { position: relative; width: 400px; }
         .search-input { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 20px; outline: none; }
         .table-responsive table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
@@ -38,8 +39,12 @@ if ($rolNormalizado == 'paciente') {
         .badge-observada { background: #fed7aa; color: #9a3412; }
         .badge-aprobada { background: #bbf7d0; color: #166534; }
         .badge-rechazada { background: #fecaca; color: #991b1b; }
-        .btn-icon { background: #f1f5f9; color: #0f172a; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; }
+        .btn-icon { background: #f1f5f9; color: #0f172a; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s;}
+        .btn-icon:hover { opacity: 0.8; }
         .btn-print { background-color: #22c55e; color: white; margin-left: 5px;}
+        .paginacion { margin-top: 20px; display: flex; justify-content: center; gap: 8px; }
+        .btn-page { background: #f1f5f9; color: #0f172a; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-page.active { background: #0c4a6e; color: white; }
     </style>
 </head>
 <body>
@@ -51,7 +56,15 @@ if ($rolNormalizado == 'paciente') {
     <div class="container-ancho">
         <div class="panel-box">
             <div class="panel-header">
-                Listado de Registros
+                <div>
+                    Listado de Registros
+                    <?php if ($rolNormalizado == 'medico'): ?>
+                        <div style="margin-top: 10px;">
+                            <button id="btnFiltroTodas" class="btn-icon" style="background:#0ea5e9; color:white;">Todas las Solicitudes</button>
+                            <button id="btnFiltroMis" class="btn-icon">Solo mis Solicitudes</button>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <div class="search-container">
                     <input type="text" id="buscadorGlobal" class="search-input" placeholder="Ingrese Nombre, DNI o N° de orden">
                 </div>
@@ -69,7 +82,7 @@ if ($rolNormalizado == 'paciente') {
                             if($estado == 'aprobada') $clase = 'badge-aprobada';
                             if($estado == 'rechazada') $clase = 'badge-rechazada';
                         ?>
-                            <tr class="fila-dato">
+                            <tr class="fila-dato" data-id-medico="<?php echo $s['id_medico'] ?? ''; ?>">
                                 <td class="col-num">#<?php echo $s['id_solicitud']; ?></td>
                                 <td><?php echo date("d/m/Y", strtotime($s['fecha'])); ?></td>
                                 <td class="col-pac"><?php echo htmlspecialchars($s['apellido_paciente'] . ', ' . $s['nombre_paciente']); ?></td>
@@ -88,26 +101,122 @@ if ($rolNormalizado == 'paciente') {
                     </tbody>
                 </table>
             </div>
+            
+            <div id="paginacion" class="paginacion"></div>
+            <div id="infoPaginacion" style="text-align: center; color: #64748b; font-size: 13px; margin-top: 10px;"></div>
+
         </div>
     </div>
 
     <script>
-        const buscadorSol = document.getElementById('buscadorGlobal');
-        if(buscadorSol) {
-            buscadorSol.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                const filas = document.querySelectorAll('.fila-dato');
+        document.addEventListener("DOMContentLoaded", function() {
+            const buscadorSol = document.getElementById('buscadorGlobal');
+            const filas = Array.from(document.querySelectorAll('.fila-dato'));
+            const paginacionDiv = document.getElementById('paginacion');
+            const infoPaginacion = document.getElementById('infoPaginacion');
+            
+            const btnMis = document.getElementById('btnFiltroMis');
+            const btnTodas = document.getElementById('btnFiltroTodas');
 
+            const idUsuarioActual = "<?php echo $id_usuario_actual; ?>";
+            let filtroActivo = 'todas'; // puede ser 'todas' o 'mis'
+            
+            // Configuración de paginación
+            let currentPage = 1;
+            const rowsPerPage = 10; // ← Podes cambiar este número si querés ver más o menos filas por página
+
+            function actualizarVista() {
+                const query = buscadorSol ? buscadorSol.value.toLowerCase().trim() : '';
+                let filasFiltradas = [];
+
+                // 1. Aplicamos los filtros de búsqueda y botón
                 filas.forEach(fila => {
                     const textoFila = fila.textContent.toLowerCase();
-                    if(textoFila.includes(query)) {
+                    const idMedicoFila = fila.getAttribute('data-id-medico');
+                    
+                    let coincideBusqueda = query === '' || textoFila.includes(query);
+                    let coincideMedico = (filtroActivo === 'todas') || (filtroActivo === 'mis' && idMedicoFila === idUsuarioActual);
+
+                    if (coincideBusqueda && coincideMedico) {
+                        filasFiltradas.push(fila);
+                        fila.style.display = ''; // Visible temporalmente para la paginación
+                    } else {
+                        fila.style.display = 'none';
+                    }
+                });
+
+                // 2. Aplicamos la paginación sobre las filas resultantes
+                const totalPages = Math.ceil(filasFiltradas.length / rowsPerPage);
+                if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = startIndex + rowsPerPage;
+
+                filasFiltradas.forEach((fila, index) => {
+                    if (index >= startIndex && index < endIndex) {
                         fila.style.display = '';
                     } else {
                         fila.style.display = 'none';
                     }
                 });
-            });
-        }
+
+                // 3. Dibujamos los botones de paginación
+                renderPaginacion(totalPages, filasFiltradas.length);
+            }
+
+            function renderPaginacion(totalPages, totalRows) {
+                paginacionDiv.innerHTML = '';
+                
+                if (totalRows === 0) {
+                    infoPaginacion.textContent = 'No hay resultados.';
+                    return;
+                }
+
+                infoPaginacion.textContent = `Mostrando página ${currentPage} de ${totalPages} (${totalRows} registros en total)`;
+
+                if (totalPages <= 1) return;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.className = `btn-page ${i === currentPage ? 'active' : ''}`;
+                    btn.onclick = () => {
+                        currentPage = i;
+                        actualizarVista();
+                    };
+                    paginacionDiv.appendChild(btn);
+                }
+            }
+
+            // Eventos
+            if (buscadorSol) {
+                buscadorSol.addEventListener('input', () => {
+                    currentPage = 1; // Al buscar, volvemos a la página 1
+                    actualizarVista();
+                });
+            }
+
+            if (btnMis && btnTodas) {
+                btnMis.addEventListener('click', () => {
+                    filtroActivo = 'mis';
+                    btnMis.style.background = '#0ea5e9'; btnMis.style.color = 'white';
+                    btnTodas.style.background = '#f1f5f9'; btnTodas.style.color = '#0f172a';
+                    currentPage = 1;
+                    actualizarVista();
+                });
+
+                btnTodas.addEventListener('click', () => {
+                    filtroActivo = 'todas';
+                    btnTodas.style.background = '#0ea5e9'; btnTodas.style.color = 'white';
+                    btnMis.style.background = '#f1f5f9'; btnMis.style.color = '#0f172a';
+                    currentPage = 1;
+                    actualizarVista();
+                });
+            }
+
+            // Iniciar por primera vez
+            actualizarVista();
+        });
     </script>
 </body>
 </html>
