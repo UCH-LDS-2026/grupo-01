@@ -20,3 +20,12 @@ error_log
 # 5. Archivos basura del Sistema Operativo
 .DS_Store
 Thumbs.db
+
+# Ignorar dependencias de Composer
+vendor/
+
+# Ignorar archivos subidos por los usuarios (para no subir recetas de prueba)
+MediFlow/uploads/
+
+# Ignorar reportes locales (opcional, por si no querés subir el test-report.php)
+test-report.php

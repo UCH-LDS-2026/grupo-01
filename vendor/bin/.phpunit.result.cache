@@ -1,1 +1,0 @@
-{"version":2,"defects":[],"times":{"SolicitudTest::test_contar_pendientes_devuelve_numero_correcto":0.012,"SolicitudTest::test_obtener_estadisticas_devuelve_array_con_datos":0.001,"SolicitudTest::test_actualizar_estado_ejecuta_correctamente":0.002}}
