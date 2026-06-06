@@ -17,6 +17,33 @@ if ($rolNormalizado == 'paciente') {
 } else {
     $solicitudes = $solicitudModelo->listar();
 }
+
+// --- NUEVO: ORDENAMIENTO ESPECÍFICO PARA AUDITOR / ADMIN ---
+if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin' || $rolNormalizado == 'administrador') {
+    usort($solicitudes, function($a, $b) {
+        // 1. Estado: Aprobadas van al final (1), las demás arriba (0)
+        $estadoA = strtolower(trim($a['estado'])) == 'aprobada' ? 1 : 0;
+        $estadoB = strtolower(trim($b['estado'])) == 'aprobada' ? 1 : 0;
+        
+        if ($estadoA !== $estadoB) {
+            return $estadoA - $estadoB;
+        }
+        
+        // 2. Desempate por Prioridad (Alta = 1, Media = 2, Baja = 3)
+        $prioMap = ['alta' => 1, 'media' => 2, 'baja' => 3];
+        $pA = $prioMap[strtolower(trim($a['prioridad']))] ?? 4;
+        $pB = $prioMap[strtolower(trim($b['prioridad']))] ?? 4;
+        
+        if ($pA !== $pB) {
+            return $pA - $pB;
+        }
+        
+        // 3. Desempate final por fecha (las más nuevas primero)
+        return strtotime($b['fecha']) - strtotime($a['fecha']);
+    });
+}
+// -----------------------------------------------------------
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -31,6 +58,13 @@ if ($rolNormalizado == 'paciente') {
         .panel-header { font-size: 20px; font-weight: 600; color: #0c4a6e; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;}
         .search-container { position: relative; width: 400px; }
         .search-input { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 20px; outline: none; }
+        
+        /* NUEVO: Estilos para la barra de filtros */
+        .filtros-barra { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .filtro-item { display: flex; flex-direction: column; font-size: 12px; font-weight: bold; color: #475569; }
+        .filtro-item select, .filtro-item input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; margin-top: 4px; font-size: 13px; }
+        /* -------------------------------------- */
+
         .table-responsive table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
         .table-responsive th { padding: 15px 12px; background-color: #f1f5f9; text-align: left; border-bottom: 2px solid #e2e8f0; }
         .table-responsive td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; }
@@ -69,6 +103,39 @@ if ($rolNormalizado == 'paciente') {
                     <input type="text" id="buscadorGlobal" class="search-input" placeholder="Ingrese Nombre, DNI o N° de orden">
                 </div>
             </div>
+
+            <div class="filtros-barra">
+                <div class="filtro-item">
+                    <label>Fecha Desde</label>
+                    <input type="date" id="filtroFechaDesde">
+                </div>
+                <div class="filtro-item">
+                    <label>Fecha Hasta</label>
+                    <input type="date" id="filtroFechaHasta">
+                </div>
+                <div class="filtro-item">
+                    <label>Estado</label>
+                    <select id="filtroEstado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="observada">Observada</option>
+                        <option value="aprobada">Aprobada</option>
+                        <option value="rechazada">Rechazada</option>
+                    </select>
+                </div>
+                <div class="filtro-item">
+                    <label>Prioridad</label>
+                    <select id="filtroPrioridad">
+                        <option value="">Todas</option>
+                        <option value="alta">Alta</option>
+                        <option value="media">Media</option>
+                        <option value="baja">Baja</option>
+                    </select>
+                </div>
+                <div class="filtro-item" style="justify-content: flex-end;">
+                    <button id="btnLimpiarFiltros" class="btn-icon" style="background: #e2e8f0;">Limpiar Filtros</button>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead><tr><th>N°</th><th>Fecha</th><th>Paciente</th><th>DNI</th><th>Práctica</th><th>Prioridad</th><th>Estado</th><th>Acciones</th></tr></thead>
@@ -82,7 +149,12 @@ if ($rolNormalizado == 'paciente') {
                             if($estado == 'aprobada') $clase = 'badge-aprobada';
                             if($estado == 'rechazada') $clase = 'badge-rechazada';
                         ?>
-                            <tr class="fila-dato" data-id-medico="<?php echo $s['id_medico'] ?? ''; ?>">
+                            <tr class="fila-dato" 
+                                data-id-medico="<?php echo $s['id_medico'] ?? ''; ?>"
+                                data-fecha="<?php echo date('Y-m-d', strtotime($s['fecha'])); ?>"
+                                data-estado="<?php echo $estado; ?>"
+                                data-prioridad="<?php echo strtolower($s['prioridad']); ?>">
+                                
                                 <td class="col-num">#<?php echo $s['id_solicitud']; ?></td>
                                 <td><?php echo date("d/m/Y", strtotime($s['fecha'])); ?></td>
                                 <td class="col-pac"><?php echo htmlspecialchars($s['apellido_paciente'] . ', ' . $s['nombre_paciente']); ?></td>
@@ -118,26 +190,49 @@ if ($rolNormalizado == 'paciente') {
             const btnMis = document.getElementById('btnFiltroMis');
             const btnTodas = document.getElementById('btnFiltroTodas');
 
+            // NUEVO: Elementos de los filtros
+            const filtroFechaDesde = document.getElementById('filtroFechaDesde');
+            const filtroFechaHasta = document.getElementById('filtroFechaHasta');
+            const filtroEstado = document.getElementById('filtroEstado');
+            const filtroPrioridad = document.getElementById('filtroPrioridad');
+            const btnLimpiar = document.getElementById('btnLimpiarFiltros');
+
             const idUsuarioActual = "<?php echo $id_usuario_actual; ?>";
             let filtroActivo = 'todas'; // puede ser 'todas' o 'mis'
             
             // Configuración de paginación
             let currentPage = 1;
-            const rowsPerPage = 10; // ← Podes cambiar este número si querés ver más o menos filas por página
+            const rowsPerPage = 10;
 
             function actualizarVista() {
                 const query = buscadorSol ? buscadorSol.value.toLowerCase().trim() : '';
+                
+                // NUEVO: Capturar valores de los filtros
+                const vDesde = filtroFechaDesde.value;
+                const vHasta = filtroFechaHasta.value;
+                const vEstado = filtroEstado.value;
+                const vPrioridad = filtroPrioridad.value;
+
                 let filasFiltradas = [];
 
                 // 1. Aplicamos los filtros de búsqueda y botón
                 filas.forEach(fila => {
                     const textoFila = fila.textContent.toLowerCase();
                     const idMedicoFila = fila.getAttribute('data-id-medico');
+                    const rowFecha = fila.getAttribute('data-fecha');
+                    const rowEstado = fila.getAttribute('data-estado');
+                    const rowPrioridad = fila.getAttribute('data-prioridad');
                     
                     let coincideBusqueda = query === '' || textoFila.includes(query);
                     let coincideMedico = (filtroActivo === 'todas') || (filtroActivo === 'mis' && idMedicoFila === idUsuarioActual);
+                    
+                    // NUEVO: Condiciones de los filtros avanzados
+                    let coincideDesde = vDesde === '' || rowFecha >= vDesde;
+                    let coincideHasta = vHasta === '' || rowFecha <= vHasta;
+                    let coincideEstado = vEstado === '' || rowEstado === vEstado;
+                    let coincidePrioridad = vPrioridad === '' || rowPrioridad === vPrioridad;
 
-                    if (coincideBusqueda && coincideMedico) {
+                    if (coincideBusqueda && coincideMedico && coincideDesde && coincideHasta && coincideEstado && coincidePrioridad) {
                         filasFiltradas.push(fila);
                         fila.style.display = ''; // Visible temporalmente para la paginación
                     } else {
@@ -190,11 +285,23 @@ if ($rolNormalizado == 'paciente') {
 
             // Eventos
             if (buscadorSol) {
-                buscadorSol.addEventListener('input', () => {
-                    currentPage = 1; // Al buscar, volvemos a la página 1
-                    actualizarVista();
-                });
+                buscadorSol.addEventListener('input', () => { currentPage = 1; actualizarVista(); });
             }
+
+            // NUEVO: Eventos de los filtros avanzados
+            [filtroFechaDesde, filtroFechaHasta, filtroEstado, filtroPrioridad].forEach(filtro => {
+                filtro.addEventListener('change', () => { currentPage = 1; actualizarVista(); });
+            });
+
+            btnLimpiar.addEventListener('click', () => {
+                filtroFechaDesde.value = '';
+                filtroFechaHasta.value = '';
+                filtroEstado.value = '';
+                filtroPrioridad.value = '';
+                if(buscadorSol) buscadorSol.value = '';
+                currentPage = 1;
+                actualizarVista();
+            });
 
             if (btnMis && btnTodas) {
                 btnMis.addEventListener('click', () => {

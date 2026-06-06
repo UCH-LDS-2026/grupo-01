@@ -8,7 +8,7 @@ require_once __DIR__ . '/../modelo/Solicitud.php';
 $id_solicitud = $_GET['id'] ?? 0;
 $solicitudModelo = new Solicitud($conexion);
 
-// Ampliamos la consulta para traer datos completos del paciente, del médico, de la práctica, y del auditor que intervino
+// Consulta idéntica a la original para traer todos los datos
 $sql = "SELECT s.*, 
         p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan, p.email as email_paciente, p.telefono as telefono_paciente, p.fecha_nacimiento,
         pr.nombre as nombre_practica, pr.descripcion as desc_practica,
@@ -19,7 +19,6 @@ $sql = "SELECT s.*,
         LEFT JOIN practica pr ON s.id_practica = pr.id_practica
         LEFT JOIN medico m ON s.id_medico = m.id_usuario
         LEFT JOIN usuario u_med ON m.id_usuario = u_med.id_usuario
-        -- Hacemos join con evaluacion para sacar el último auditor que tocó la solicitud
         LEFT JOIN evaluacion ev ON ev.id_solicitud = s.id_solicitud
         LEFT JOIN auditor aud ON ev.id_auditor = aud.id_usuario
         LEFT JOIN usuario u_aud ON aud.id_usuario = u_aud.id_usuario
@@ -31,7 +30,6 @@ $stmt->bind_param("i", $id_solicitud);
 $stmt->execute();
 $data = $stmt->get_result()->fetch_assoc();
 
-// Si no trajo datos por la evaluación (ej. está pendiente y no la tocó un auditor), buscamos la solicitud sola
 if (!$data) { 
     $sql_fallback = "SELECT s.*, 
         p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan, p.email as email_paciente, p.telefono as telefono_paciente, p.fecha_nacimiento,
@@ -50,6 +48,23 @@ if (!$data) {
     
     if(!$data) { exit("Solicitud no encontrada."); }
 }
+
+// ==========================================
+// GENERACIÓN DEL CÓDIGO QR EN MEMORIA
+// ==========================================
+require_once __DIR__ . '/../../src/phpqrcode/qrlib.php';
+
+$url_validacion = "http://localhost/mediflow/grupo-01/MediFlow/validar.php?id=" . $data['id_solicitud'];
+
+ob_start();
+QRcode::png($url_validacion, false, QR_ECLEVEL_L, 4, 2);
+$datos_imagen = ob_get_clean();
+
+// SOLUCIÓN AL ERROR: Forzamos al navegador a renderizar HTML puro, anulando el header de la librería
+header('Content-Type: text/html; charset=UTF-8');
+
+$base64_qr = 'data:image/png;base64,' . base64_encode($datos_imagen);
+// ==========================================
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -68,12 +83,14 @@ if (!$data) {
         .section-title { font-weight: bold; color: #0c4a6e; text-transform: uppercase; margin-bottom: 5px; grid-column: span 2; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-top: 10px; }
         .full-width { grid-column: span 2; }
         
-        .footer-voucher { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px; position: relative; min-height: 80px;}
+        .footer-voucher { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px; position: relative; min-height: 100px;}
         .footer-disclaimer { text-align: center; font-size: 11px; color: #64748b; margin-top: 20px;}
         
         .auditor-info { font-size: 12px; color: #475569; position: absolute; left: 0; top: 15px; }
         
-        .stamp { position: absolute; bottom: 40px; right: 20px; border: 3px double #166534; color: #166534; transform: rotate(-10deg); padding: 8px 15px; font-weight: bold; font-size: 14px; text-transform: uppercase; border-radius: 4px; background: rgba(255,255,255,0.9); z-index: 10;}
+        /* Ubicación perfecta para el QR abajo a la derecha */
+        .qr-code { position: absolute; bottom: 40px; right: 20px; text-align: center; }
+        .qr-code img { width: 95px; height: 95px; border: 1px solid #cbd5e1; padding: 4px; border-radius: 4px; background: white; }
         
         /* Ocultar botones al mandar a la impresora */
         @media print { .no-print { display: none; } body { padding: 0; } .voucher { border: 2px solid #000; } }
@@ -130,7 +147,10 @@ if (!$data) {
 
         <div class="footer-voucher">
             <?php if ($data['estado'] == 'aprobada'): ?>
-                <div class="stamp">Autorizado<br>Auditoría Médica</div>
+                <div class="qr-code">
+                    <img src="<?php echo $base64_qr; ?>" alt="QR Validación">
+                </div>
+                
                 <div class="auditor-info">
                     <strong>Aprobado por:</strong> <?php echo htmlspecialchars(($data['apellido_auditor'] ?? '') . ', ' . ($data['nombre_auditor'] ?? 'Sistema Central')); ?><br>
                     <strong>Sector:</strong> <?php echo htmlspecialchars($data['sector'] ?? 'Auditoría General'); ?>
@@ -138,7 +158,7 @@ if (!$data) {
             <?php endif; ?>
 
             <div class="footer-disclaimer" style="clear:both; padding-top:40px;">
-                Documento digital válido como autorización de prestación médica. Presentar junto a la credencial física en el centro médico prestador.
+                Documento digital válido como autorización de prestación médica. Presentar junto a la credencial física en el centro médico prestador. Escanee el código QR para verificar autenticidad.
             </div>
         </div>
     </div>
