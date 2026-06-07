@@ -54,7 +54,7 @@ if (!$data) {
 // ==========================================
 require_once __DIR__ . '/../../src/phpqrcode/qrlib.php';
 
-$url_validacion = "http://localhost/mediflow/grupo-01/MediFlow/validar.php?id=" . $data['id_solicitud'];
+$url_validacion = "http://192.168.1.47/mediflow/grupo-01/MediFlow/validar.php?id=" . $data['id_solicitud'];
 
 ob_start();
 QRcode::png($url_validacion, false, QR_ECLEVEL_L, 4, 2);

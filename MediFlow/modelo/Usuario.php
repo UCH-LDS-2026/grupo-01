@@ -27,16 +27,16 @@ class Usuario {
     // --------------------------------------------------------
     // NUEVAS FUNCIONES ACTUALIZADAS
     // --------------------------------------------------------
-    
-    public function crear($nombre, $apellido, $email, $password, $rol, $extras = []) {
+
+    public function crear($nombre, $apellido, $email, $password, $rol, $dni, $extras = []) {
         // Iniciamos transacción para que no se guarde el usuario si falla la tabla hija
         $this->conexion->begin_transaction();
 
         try {
-            // 1. Guardar en la tabla padre 'usuario'
-            $sql = "INSERT INTO usuario (nombre, apellido, email, contrasena, rol) VALUES (?, ?, ?, ?, ?)";
+            // 1. Guardar en la tabla padre 'usuario' (Ahora incluye DNI y Activo)
+            $sql = "INSERT INTO usuario (nombre, apellido, email, contrasena, rol, activo, dni) VALUES (?, ?, ?, ?, ?, 1, ?)";
             $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("sssss", $nombre, $apellido, $email, $password, $rol);
+            $stmt->bind_param("ssssss", $nombre, $apellido, $email, $password, $rol, $dni);
             $stmt->execute();
             
             // Obtenemos el ID del usuario recién creado
@@ -56,10 +56,11 @@ class Usuario {
                 $stmt_aud->execute();
 
             } elseif ($rol == 'paciente') {
-                // Nota: La tabla paciente de tu BD no usa id_usuario, usa id_paciente propio
-                $sql_pac = "INSERT INTO paciente (nombre, apellido, dni, fecha_nacimiento, email, telefono, plan, nro_afiliado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                // Nota: La tabla paciente no usa id_usuario, usa id_paciente propio,
+                // pero usamos el DNI que viene por parámetro para enlazar
+                $sql_pac = "INSERT INTO paciente (nombre, apellido, dni, fecha_nacimiento, email, telefono, plan, nro_afiliado, fecha_alta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                 $stmt_pac = $this->conexion->prepare($sql_pac);
-                $stmt_pac->bind_param("ssssssss", $nombre, $apellido, $extras['dni'], $extras['fecha_nacimiento'], $email, $extras['telefono'], $extras['plan'], $extras['nro_afiliado']);
+                $stmt_pac->bind_param("ssssssss", $nombre, $apellido, $dni, $extras['fecha_nacimiento'], $email, $extras['telefono'], $extras['plan'], $extras['nro_afiliado']);
                 $stmt_pac->execute();
             }
 

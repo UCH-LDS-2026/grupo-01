@@ -331,7 +331,7 @@ margin: 40px 0 20px;
 </p>
 
 <div style="text-align:center; margin-top:10px;">
-<a href="#" style="font-size:13px; color:#0b5687;">¿Olvidaste tu contraseña?</a>
+<a href="../recuperar_clave.php" style="font-size: 12px; color: gray;">¿Olvidaste tu contraseña?</a>
 </div>
 </div>
 

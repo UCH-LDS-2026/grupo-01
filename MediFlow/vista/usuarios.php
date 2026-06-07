@@ -52,20 +52,25 @@ $listaUsuarios = $usuarioModelo->listar();
                     
                     <div class="form-group">
                         <label>Nombre</label>
-                        <input type="text" name="nombre" required placeholder="Ej: Juan">
+                        <input type="text" name="nombre" required placeholder="Ej: pepito">
                     </div>
                     <div class="form-group">
                         <label>Apellido</label>
-                        <input type="text" name="apellido" required placeholder="Ej: Pérez">
+                        <input type="text" name="apellido" required placeholder="Ej: XXXXXXX">
                     </div>
                     <div class="form-group">
                         <label>Correo Electrónico</label>
-                        <input type="email" name="email" required placeholder="juan@mediflow.com">
+                        <input type="email" name="email" required placeholder="pepito@ejemplo.com">
                     </div>
                     <div class="form-group">
                         <label>Contraseña</label>
                         <input type="text" name="password" required placeholder="Asignar contraseña">
                     </div>
+                    <div class="form-group">
+                        <label>DNI</label>
+                        <input type="text" name="dni" required placeholder="Ej: XXXXXXXX">
+                    </div>
+
                     <div class="form-group">
                         <label>Rol en el Sistema</label>
                         <select name="rol" id="select-rol" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
@@ -92,10 +97,6 @@ $listaUsuarios = $usuarioModelo->listar();
                         <input type="text" name="sector" class="req-dinamico" placeholder="Ej: Auditoría Central">
                     </div>
 
-                    <div class="form-group extra-field" data-rol="paciente">
-                        <label>DNI</label>
-                        <input type="text" name="dni" class="req-dinamico" placeholder="Ej: 46866891">
-                    </div>
                     <div class="form-group extra-field" data-rol="paciente">
                         <label>Fecha de Nacimiento</label>
                         <input type="date" name="fecha_nacimiento" class="req-dinamico">
@@ -128,6 +129,7 @@ $listaUsuarios = $usuarioModelo->listar();
                         <tr>
                             <th>ID</th>
                             <th>Nombre Completo</th>
+                            <th>DNI</th>
                             <th>Email (Usuario)</th>
                             <th>Rol</th>
                             <th style="text-align: center;">Acciones</th>
@@ -136,13 +138,14 @@ $listaUsuarios = $usuarioModelo->listar();
                     <tbody>
                         <?php if (empty($listaUsuarios)): ?>
                             <tr>
-                                <td colspan="5" class="no-data">No hay usuarios registrados.</td>
+                                <td colspan="6" class="no-data">No hay usuarios registrados.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($listaUsuarios as $u): ?>
                                 <tr>
                                     <td><strong>#<?php echo htmlspecialchars($u['id_usuario']); ?></strong></td>
                                     <td><?php echo htmlspecialchars($u['apellido'] . ', ' . $u['nombre']); ?></td>
+                                    <td><?php echo htmlspecialchars($u['dni'] ?? '---'); ?></td>
                                     <td><?php echo htmlspecialchars($u['email']); ?></td>
                                     <td><span class="badge"><?php echo htmlspecialchars($u['rol']); ?></span></td>
                                     <td style="text-align: center;">
