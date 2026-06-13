@@ -29,3 +29,5 @@ MediFlow/uploads/
 
 # Ignorar reportes locales (opcional, por si no querés subir el test-report.php)
 test-report.php
+
+.phpunit.cache/
