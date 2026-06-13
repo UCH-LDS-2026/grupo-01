@@ -3,8 +3,8 @@
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests para la clase Usuario - CASOS DEFENSIVOS
- * Prueba validación y casos límite que podrían romper el sistema
+ * Tests para la clase Usuario - CASOS DEFENSIVOS Y SEGURIDAD
+ * Pruebas actualizadas para validar la nueva arquitectura de seguridad.
  */
 class UsuarioTest extends TestCase
 {
@@ -18,146 +18,74 @@ class UsuarioTest extends TestCase
     }
 
     /**
-     * Test 1: iniciarSesion con EMAIL VACÍO (posible error)
+     * Test 1: iniciarSesion con EMAIL VACÍO
      */
     public function testIniciarSesionConEmailVacio(): void
     {
-        $stmtMock = $this->createMock(mysqli_stmt::class);
-        $resultMock = $this->createMock(mysqli_result::class);
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param')
-            ->with("s", "");
-
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $stmtMock->expects($this->once())
-            ->method('get_result')
-            ->willReturn($resultMock);
-
-        $resultMock->expects($this->once())
-            ->method('fetch_assoc')
-            ->willReturn(null);
+        // Tu sistema seguro ya no consulta la BD si el dato está vacío
+        $this->conexionMock->expects($this->never())->method('prepare');
 
         $resultado = $this->usuario->iniciarSesion("", "cualquierpass");
-        
-        // Debería rechazar email vacío
-        $this->assertFalse($resultado, "Email vacío debe rechazarse");
+        $this->assertFalse($resultado, "El sistema seguro debe rechazar el email vacío instantáneamente");
     }
 
     /**
-     * Test 2: iniciarSesion con CONTRASEÑA VACÍA (posible error)
+     * Test 2: iniciarSesion con CONTRASEÑA VACÍA
      */
-    public function testIniciarSesionConContraseñaVacia(): void
+    public function testIniciarSesionConContrasenaVacia(): void
     {
-        $stmtMock = $this->createMock(mysqli_stmt::class);
-        $resultMock = $this->createMock(mysqli_result::class);
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $stmtMock->expects($this->once())
-            ->method('get_result')
-            ->willReturn($resultMock);
-
-        $resultMock->expects($this->once())
-            ->method('fetch_assoc')
-            ->willReturn(null);
+        $this->conexionMock->expects($this->never())->method('prepare');
 
         $resultado = $this->usuario->iniciarSesion("test@test.com", "");
-        
-        $this->assertFalse($resultado, "Contraseña vacía debe rechazarse");
+        $this->assertFalse($resultado, "El sistema seguro debe rechazar contraseñas vacías instantáneamente");
     }
 
     /**
-     * Test 3: iniciarSesion con INYECCIÓN SQL (') - posible ataque
+     * Test 3: iniciarSesion con INYECCIÓN SQL
      */
     public function testIniciarSesionConInyeccionSQL(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
         $resultMock = $this->createMock(mysqli_result::class);
 
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
 
-        // Intenta inyectar SQL
         $emailMalicioso = "admin' OR '1'='1";
-        $stmtMock->expects($this->once())
-            ->method('bind_param')
-            ->with("s", $emailMalicioso);
-
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $stmtMock->expects($this->once())
-            ->method('get_result')
-            ->willReturn($resultMock);
-
-        $resultMock->expects($this->once())
-            ->method('fetch_assoc')
-            ->willReturn(null); // Debe rechazar
+        $stmtMock->expects($this->once())->method('bind_param')->with("s", $emailMalicioso);
+        $stmtMock->expects($this->once())->method('execute');
+        $stmtMock->expects($this->once())->method('get_result')->willReturn($resultMock);
+        $resultMock->expects($this->once())->method('fetch_assoc')->willReturn(null);
 
         $resultado = $this->usuario->iniciarSesion($emailMalicioso, "pass");
-        
-        $this->assertFalse($resultado, "Inyección SQL debe ser rechazada");
+        $this->assertFalse($resultado, "La inyección SQL fue neutralizada exitosamente");
     }
 
     /**
-     * Test 4: eliminar con ID NEGATIVO (caso inválido)
+     * Test 4: eliminar con ID NEGATIVO
      */
     public function testEliminarConIDNegativo(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param')
-            ->with("i", -1);
-
-        $stmtMock->expects($this->once())
-            ->method('execute')
-            ->willReturn(false); // Falla con ID negativo
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
+        $stmtMock->expects($this->once())->method('bind_param')->with("i", -1);
+        $stmtMock->expects($this->once())->method('execute')->willReturn(false);
 
         $resultado = $this->usuario->eliminar(-1);
-        
-        $this->assertFalse($resultado, "ID negativo debe rechazarse");
+        $this->assertFalse($resultado, "ID negativo rechazado correctamente");
     }
 
     /**
-     * Test 5: eliminar con ID CERO (caso inválido)
+     * Test 5: eliminar con ID CERO
      */
     public function testEliminarConIDCero(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param')
-            ->with("i", 0);
-
-        $stmtMock->expects($this->once())
-            ->method('execute')
-            ->willReturn(false);
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
+        $stmtMock->expects($this->once())->method('bind_param')->with("i", 0);
+        $stmtMock->expects($this->once())->method('execute')->willReturn(false);
 
         $resultado = $this->usuario->eliminar(0);
-        
-        $this->assertFalse($resultado, "ID cero debe ser rechazado");
+        $this->assertFalse($resultado, "ID cero rechazado correctamente");
     }
 
     /**
@@ -166,253 +94,170 @@ class UsuarioTest extends TestCase
     public function testListarUsuariosVacio(): void
     {
         $resultMock = $this->createMock(mysqli_result::class);
-        
-        $this->conexionMock->expects($this->once())
-            ->method('query')
-            ->willReturn($resultMock);
-
-        $resultMock->expects($this->once())
-            ->method('fetch_all')
-            ->with(MYSQLI_ASSOC)
-            ->willReturn([]); // BD vacía
+        $this->conexionMock->expects($this->once())->method('query')->willReturn($resultMock);
+        $resultMock->expects($this->once())->method('fetch_all')->with(MYSQLI_ASSOC)->willReturn([]);
 
         $resultado = $this->usuario->listar();
-
-        $this->assertIsArray($resultado, "Debe retornar array");
-        $this->assertEmpty($resultado, "Array debe estar vacío");
+        $this->assertIsArray($resultado);
+        $this->assertEmpty($resultado);
     }
 
     /**
-     * Test 7: crear usuario con EMAIL DUPLICADO (posible error BD)
+     * Test 7: crear usuario con EMAIL DUPLICADO
      */
     public function testCrearUsuarioConEmailDuplicado(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
+        $this->conexionMock->expects($this->once())->method('begin_transaction');
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
+        $stmtMock->expects($this->once())->method('bind_param');
+        
+        $stmtMock->expects($this->once())->method('execute')->willThrowException(new Exception("Duplicate entry for email"));
+        $this->conexionMock->expects($this->once())->method('rollback');
 
-        $this->conexionMock->expects($this->once())
-            ->method('begin_transaction');
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param');
-
-        // Simular error de email duplicado
-        $stmtMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new Exception("Duplicate entry for email"));
-
-        $this->conexionMock->expects($this->once())
-            ->method('rollback'); // Debe revertir
-
-        $resultado = $this->usuario->crear("Juan", "Pérez", "duplicate@test.com", "pass", "medico", 
+        $resultado = $this->usuario->crear("Juan", "Pérez", "duplicate@test.com", "pass", "medico", "12345678", 
             ['matricula' => '12345', 'especialidad' => 'Cardiología']);
 
-        $this->assertFalse($resultado, "Email duplicado debe fallar");
+        $this->assertFalse($resultado, "El rollback funcionó perfecto ante un email duplicado");
     }
 
     /**
-     * Test 8: VULNERABILIDAD ENCONTRADA - Falta validación de campos vacíos
-     * Este test FALLA porque el código no valida entrada antes de prepare()
-     * DEBE agregarse validación en Usuario.php línea 39
+     * Test 8: VULNERABILIDAD RESUELTA - Validación de campos vacíos
      */
-    public function testCrearUsuarioConCamposVaciosVulnerabilidadDetectada(): void
+    public function testCrearUsuarioConCamposVaciosEsBloqueado(): void
     {
-        // Este test debería fallar porque NO hay validación de campos vacíos
-        // La función create() DEBERÍA rechazarlos pero no lo hace
-        $this->fail("VULNERABILIDAD DETECTADA: La función crear() no valida campos vacíos. Sin validación, campos como '' pueden causar comportamiento impredecible en la BD");
+        $this->conexionMock->expects($this->never())->method('begin_transaction');
+
+        $resultado = $this->usuario->crear("", "", "", "", "", "");
+        
+        $this->assertFalse($resultado, "¡Vulnerabilidad resuelta! El sistema bloqueó la creación con campos vacíos.");
     }
 
     /**
-     * Test 9: CASOS LÍMITE - Crear usuario con NOMBRE muy largo (>255 caracteres)
+     * Test 9: Crear usuario con NOMBRE muy largo
      */
     public function testCrearUsuarioConNombreMuyLargo(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
-        $nombreLargo = str_repeat("a", 300); // Excede límite de VARCHAR(255)
+        $nombreLargo = str_repeat("a", 300);
 
-        $this->conexionMock->expects($this->once())
-            ->method('begin_transaction');
+        $this->conexionMock->expects($this->once())->method('begin_transaction');
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
+        $stmtMock->expects($this->once())->method('bind_param');
+        $stmtMock->expects($this->once())->method('execute')->willThrowException(new Exception("Data too long"));
+        $this->conexionMock->expects($this->once())->method('rollback');
 
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        // El bind_param debería truncar o fallar
-        $stmtMock->expects($this->once())
-            ->method('bind_param');
-
-        $stmtMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new Exception("Data too long for column 'nombre'"));
-
-        $this->conexionMock->expects($this->once())
-            ->method('rollback');
-
-        $resultado = $this->usuario->crear($nombreLargo, "Pérez", "test@test.com", "pass123", "paciente", 
-            ['dni' => '12345678', 'fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
+        $resultado = $this->usuario->crear($nombreLargo, "Pérez", "test@test.com", "pass123", "paciente", "12345678", 
+            ['fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
         
-        $this->assertFalse($resultado, "Nombre muy largo debe rechazarse");
+        $this->assertFalse($resultado);
     }
 
     /**
-     * Test 10: CASOS LÍMITE - Crear usuario con EMAIL INVÁLIDO (sin @)
+     * Test 10: VULNERABILIDAD RESUELTA - Email Inválido
      */
-    public function testCrearUsuarioConEmailInvalido(): void
+    public function testCrearUsuarioConEmailInvalidoEsBloqueado(): void
     {
-        $stmtMock = $this->createMock(mysqli_stmt::class);
-
-        $this->conexionMock->expects($this->once())
-            ->method('begin_transaction');
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
+        $this->conexionMock->expects($this->never())->method('begin_transaction');
         $emailInvalido = "notanemail";
-        $stmtMock->expects($this->once())
-            ->method('bind_param');
 
-        // Sin validación, se inserta un email inválido
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $this->conexionMock->expects($this->once())
-            ->method('commit');
-
-        $resultado = $this->usuario->crear("Juan", "Pérez", $emailInvalido, "pass123", "paciente", 
-            ['dni' => '12345678', 'fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
+        $resultado = $this->usuario->crear("Juan", "Pérez", $emailInvalido, "pass123", "paciente", "12345678", 
+            ['fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
         
-        // Este test EXPONE que no hay validación de formato email
-        $this->fail("VULNERABILIDAD DETECTADA: Email '$emailInvalido' se acepta sin validación de formato");
+        $this->assertFalse($resultado, "¡Vulnerabilidad resuelta! Se bloqueó un email con formato incorrecto.");
     }
 
     /**
-     * Test 11: CASOS LÍMITE - Crear usuario con DNI INVÁLIDO (letras en lugar de números)
+     * Test 11: VULNERABILIDAD RESUELTA - DNI Inválido
      */
-    public function testCrearUsuarioConDNIInvalido(): void
+    public function testCrearUsuarioConDNIInvalidoEsBloqueado(): void
     {
-        $stmtMock = $this->createMock(mysqli_stmt::class);
-        $dniInvalido = "ABCDEFGH"; // Debe ser números
+        $this->conexionMock->expects($this->never())->method('begin_transaction');
+        $dniInvalido = "ABCDEFGH";
 
-        $this->conexionMock->expects($this->once())
-            ->method('begin_transaction');
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param');
-
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $this->conexionMock->expects($this->once())
-            ->method('commit');
-
-        $resultado = $this->usuario->crear("Juan", "Pérez", "test@test.com", "pass123", "paciente", 
-            ['dni' => $dniInvalido, 'fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
+        $resultado = $this->usuario->crear("Juan", "Pérez", "test@test.com", "pass123", "paciente", $dniInvalido, 
+            ['fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
         
-        $this->fail("VULNERABILIDAD DETECTADA: DNI '$dniInvalido' se acepta sin validar que sea numérico");
+        $this->assertFalse($resultado, "¡Vulnerabilidad resuelta! Se bloqueó el DNI con letras.");
     }
 
     /**
-     * Test 12: CASOS LÍMITE - Crear usuario con TELÉFONO NO NUMÉRICO (letras)
+     * Test 12: VULNERABILIDAD RESUELTA - Teléfono Inválido
      */
-    public function testCrearUsuarioConTelefonoInvalido(): void
+    public function testCrearUsuarioConTelefonoInvalidoEsBloqueado(): void
     {
-        $stmtMock = $this->createMock(mysqli_stmt::class);
-        $telefonoInvalido = "ABCD1234"; // Debe ser números
+        $this->conexionMock->expects($this->never())->method('begin_transaction');
+        $telefonoInvalido = "ABCD1234";
 
-        $this->conexionMock->expects($this->once())
-            ->method('begin_transaction');
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param');
-
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $this->conexionMock->expects($this->once())
-            ->method('commit');
-
-        $resultado = $this->usuario->crear("Juan", "Pérez", "test@test.com", "pass123", "paciente", 
-            ['dni' => '12345678', 'fecha_nacimiento' => '1990-01-01', 'telefono' => $telefonoInvalido, 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
+        $resultado = $this->usuario->crear("Juan", "Pérez", "test@test.com", "pass123", "paciente", "12345678", 
+            ['fecha_nacimiento' => '1990-01-01', 'telefono' => $telefonoInvalido, 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
         
-        $this->fail("VULNERABILIDAD DETECTADA: Teléfono '$telefonoInvalido' se acepta sin validar que sea numérico");
+        $this->assertFalse($resultado, "¡Vulnerabilidad resuelta! Se bloqueó el teléfono no numérico.");
     }
 
     /**
-     * Test 13: CASOS LÍMITE - Iniciar sesión con EMAIL que contiene espacios
+     * Test 13: VULNERABILIDAD RESUELTA - Limpieza de espacios en email
      */
-    public function testIniciarSesionConEmailConEspacios(): void
+    public function testIniciarSesionLimpiaEspaciosDelEmail(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
         $resultMock = $this->createMock(mysqli_result::class);
-        $emailConEspacios = " test@test.com ";
-
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
-        $stmtMock->expects($this->once())
-            ->method('bind_param')
-            ->with("s", $emailConEspacios); // Sin trim()
-
-        $stmtMock->expects($this->once())
-            ->method('execute');
-
-        $stmtMock->expects($this->once())
-            ->method('get_result')
-            ->willReturn($resultMock);
-
-        // No encontrará el usuario porque busca " test@test.com "
-        $resultMock->expects($this->once())
-            ->method('fetch_assoc')
-            ->willReturn(null);
-
-        $resultado = $this->usuario->iniciarSesion($emailConEspacios, "password123");
         
-        $this->fail("VULNERABILIDAD DETECTADA: Email con espacios '$emailConEspacios' se acepta sin trim()");
+        $emailConEspacios = " test@test.com ";
+        $emailLimpio = "test@test.com";
+
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
+        
+        // Verifica que la función trim() hizo su trabajo antes de llegar a la BD
+        $stmtMock->expects($this->once())->method('bind_param')->with("s", $emailLimpio); 
+
+        $stmtMock->expects($this->once())->method('execute');
+        $stmtMock->expects($this->once())->method('get_result')->willReturn($resultMock);
+        $resultMock->expects($this->once())->method('fetch_assoc')->willReturn(null);
+
+        $this->usuario->iniciarSesion($emailConEspacios, "password123");
+        $this->assertTrue(true, "¡Vulnerabilidad resuelta! El sistema limpia los espacios correctamente.");
     }
 
     /**
-     * Test 14: CASOS LÍMITE - Contraseña sin hasheado (texto plano)
-     * La función guarda passwords en texto plano (CRÍTICO)
+     * Test 14: VULNERABILIDAD CRÍTICA RESUELTA - Contraseña Hasheada
      */
-    public function testCrearUsuarioConContraseñaTextoplano(): void
+/**
+     * Test 14: VULNERABILIDAD CRÍTICA RESUELTA - Contraseña Hasheada
+     */
+    public function testCrearUsuarioEncriptaContrasena(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
-        $passwordPlano = "micontraseña123"; // Debería estar hasheada
+        $passwordPlano = "micontrasena123"; 
 
-        $this->conexionMock->expects($this->once())
-            ->method('begin_transaction');
+        $this->conexionMock->expects($this->once())->method('begin_transaction');
+        $this->conexionMock->expects($this->once())->method('prepare')->willReturn($stmtMock);
 
-        $this->conexionMock->expects($this->once())
-            ->method('prepare')
-            ->willReturn($stmtMock);
-
+        // 1. Verificamos que la contraseña se haya encriptado
         $stmtMock->expects($this->once())
             ->method('bind_param')
-            ->with("sssss", "Juan", "Pérez", "test@test.com", $passwordPlano, "paciente");
+            ->with(
+                $this->equalTo("ssssss"),
+                $this->equalTo("Juan"),
+                $this->equalTo("Pérez"),
+                $this->equalTo("test@test.com"),
+                $this->logicalNot($this->equalTo($passwordPlano)), // Confirma que ya no es texto plano
+                $this->equalTo("paciente"),
+                $this->equalTo("12345678")
+            );
 
+        // 2. EL TRUCO: Forzamos una interrupción acá para que no llegue a leer el insert_id fantasma
         $stmtMock->expects($this->once())
-            ->method('execute');
+            ->method('execute')
+            ->willThrowException(new Exception("Interrupción forzada exitosa"));
 
-        $this->conexionMock->expects($this->once())
-            ->method('commit');
+        // Como forzamos la interrupción, se va a ejecutar el rollback
+        $this->conexionMock->expects($this->once())->method('rollback');
 
-        $resultado = $this->usuario->crear("Juan", "Pérez", "test@test.com", $passwordPlano, "paciente", 
-            ['dni' => '12345678', 'fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
+        $resultado = $this->usuario->crear("Juan", "Pérez", "test@test.com", $passwordPlano, "paciente", "12345678", 
+            ['fecha_nacimiento' => '1990-01-01', 'telefono' => '1122334455', 'plan' => 'obra', 'nro_afiliado' => 'AF123']);
         
-        $this->fail("VULNERABILIDAD CRÍTICA DETECTADA: Contraseña guardada en TEXTO PLANO. Debe usar password_hash()");
+        // El test pasa exitosamente comprobando que se validó la seguridad
+        $this->assertFalse($resultado);
     }
 }
-

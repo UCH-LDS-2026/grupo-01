@@ -9,9 +9,13 @@ if (!isset($_SESSION['usuario'])) {
 require_once __DIR__ . '/../../src/config.php';
 require_once __DIR__ . '/../modelo/Solicitud.php';
 
-$usuario_sesion = $_SESSION['usuario'];
-$rolNormalizado = strtolower(trim($usuario_sesion['rol']));
-$email_usuario = $usuario_sesion['email'];
+$usuario_sesion = $_SESSION['usuario'] ?? [];
+
+// Si faltan datos básicos, asignamos un valor por defecto para que no explote
+$rolNormalizado = strtolower(trim($usuario_sesion['rol'] ?? ''));
+$email_usuario = $usuario_sesion['email'] ?? 'No disponible';
+$nombre_usuario = $usuario_sesion['nombre'] ?? 'Usuario';
+$apellido_usuario = $usuario_sesion['apellido'] ?? '';
 
 $datosPaciente = null;
 if ($rolNormalizado == 'paciente') {
@@ -70,11 +74,11 @@ if ($rolNormalizado == 'paciente') {
                     <!-- Nombre y Apellido separados -->
                     <div class="info-item">
                         <span class="info-label">Nombre</span>
-                        <span class="info-value"><?php echo htmlspecialchars($usuario_sesion['nombre']); ?></span>
+                        <span class="info-value"><?php echo htmlspecialchars($usuario_sesion['nombre'] ?? 'Sin nombre'); ?></span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Apellido</span>
-                        <span class="info-value"><?php echo htmlspecialchars($usuario_sesion['apellido']); ?></span>
+                        <span class="info-value"><?php echo htmlspecialchars($usuario_sesion['apellido'] ?? 'Sin apellido'); ?></span>
                     </div>
                     
                     <?php if ($rolNormalizado == 'paciente' && $datosPaciente): ?>
