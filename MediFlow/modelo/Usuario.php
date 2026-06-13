@@ -10,6 +10,11 @@ class Usuario {
     // FUNCIÓN DE TU COMPAÑERO (Para que el Login siga andando)
     // --------------------------------------------------------
     public function iniciarSesion($email, $password) {
+        $email = trim($email);
+        if ($email === '' || $password === '') {
+            return false;
+        }
+
         $sql = "SELECT * FROM usuario WHERE email = ?";
         $stmt = $this->conexion->prepare($sql);
         $stmt->bind_param("s", $email);
@@ -17,7 +22,7 @@ class Usuario {
         $resultado = $stmt->get_result();
 
         if ($usuario = $resultado->fetch_assoc()) {
-            if ($usuario['contrasena'] == $password) {
+            if (password_verify($password, $usuario['contrasena'])) {
                 return $usuario;
             }
         }
@@ -29,14 +34,38 @@ class Usuario {
     // --------------------------------------------------------
 
     public function crear($nombre, $apellido, $email, $password, $rol, $dni, $extras = []) {
-        // Iniciamos transacción para que no se guarde el usuario si falla la tabla hija
+        $nombre = trim($nombre);
+        $apellido = trim($apellido);
+        $email = trim($email);
+        $rol = trim($rol);
+        $dni = trim($dni);
+
+        if ($nombre === '' || $apellido === '' || $email === '' || $password === '' || $rol === '' || $dni === '') {
+            return false;
+        }
+
+        if (!$this->validarEmail($email) || !$this->validarDNI($dni)) {
+            return false;
+        }
+
+        if ($rol === 'paciente') {
+            if (empty($extras['fecha_nacimiento']) || empty($extras['telefono']) || empty($extras['plan']) || empty($extras['nro_afiliado'])) {
+                return false;
+            }
+            if (!$this->validarTelefono($extras['telefono'])) {
+                return false;
+            }
+        }
+
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
         $this->conexion->begin_transaction();
 
         try {
             // 1. Guardar en la tabla padre 'usuario' (Ahora incluye DNI y Activo)
             $sql = "INSERT INTO usuario (nombre, apellido, email, contrasena, rol, activo, dni) VALUES (?, ?, ?, ?, ?, 1, ?)";
             $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("ssssss", $nombre, $apellido, $email, $password, $rol, $dni);
+            $stmt->bind_param("ssssss", $nombre, $apellido, $email, $passwordHash, $rol, $dni);
             $stmt->execute();
             
             // Obtenemos el ID del usuario recién creado
@@ -56,8 +85,6 @@ class Usuario {
                 $stmt_aud->execute();
 
             } elseif ($rol == 'paciente') {
-                // Nota: La tabla paciente no usa id_usuario, usa id_paciente propio,
-                // pero usamos el DNI que viene por parámetro para enlazar
                 $sql_pac = "INSERT INTO paciente (nombre, apellido, dni, fecha_nacimiento, email, telefono, plan, nro_afiliado, fecha_alta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                 $stmt_pac = $this->conexion->prepare($sql_pac);
                 $stmt_pac->bind_param("ssssssss", $nombre, $apellido, $dni, $extras['fecha_nacimiento'], $email, $extras['telefono'], $extras['plan'], $extras['nro_afiliado']);
@@ -73,6 +100,18 @@ class Usuario {
             $this->conexion->rollback();
             return false;
         }
+    }
+
+    private function validarEmail($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    private function validarDNI($dni) {
+        return ctype_digit($dni) && $dni !== '';
+    }
+
+    private function validarTelefono($telefono) {
+        return ctype_digit($telefono) && $telefono !== '';
     }
 
     public function listar() {
