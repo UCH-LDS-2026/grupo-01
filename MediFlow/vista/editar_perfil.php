@@ -66,43 +66,37 @@ if ($rolNormalizado == 'paciente') {
                 <input type="hidden" name="id_paciente" value="<?php echo htmlspecialchars($datosPaciente['id_paciente']); ?>">
             <?php endif; ?>
             
-            <!-- TARJETA DE DATOS FIJOS (NO EDITABLES) -->
+            <?php if ($rolNormalizado == 'paciente' && $datosPaciente): ?>
             <div class="info-section">
                 <h3>🛡️ Información de Afiliación</h3>
                 <div class="info-grid">
                     
-                    <!-- Nombre y Apellido separados -->
-                    <div class="info-item">
-                        <span class="info-label">Nombre</span>
-                        <span class="info-value"><?php echo htmlspecialchars($usuario_sesion['nombre'] ?? 'Sin nombre'); ?></span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Apellido</span>
-                        <span class="info-value"><?php echo htmlspecialchars($usuario_sesion['apellido'] ?? 'Sin apellido'); ?></span>
-                    </div>
-                    
-                    <?php if ($rolNormalizado == 'paciente' && $datosPaciente): ?>
-                    <!-- DNI y Nro Afiliado -->
-                    <div class="info-item">
-                        <span class="info-label">DNI</span>
-                        <span class="info-value"><?php echo htmlspecialchars($datosPaciente['dni'] ?? '---'); ?></span>
-                    </div>
                     <div class="info-item">
                         <span class="info-label">Nro. de Afiliado</span>
                         <span class="info-value"><?php echo htmlspecialchars($datosPaciente['nro_afiliado'] ?? '---'); ?></span>
                     </div>
                     
-                    <!-- Obra Social y Plan -->
-                    <div class="info-item">
-                        <span class="info-label">Obra Social</span>
-                        <span class="info-value"><?php echo htmlspecialchars($datosPaciente['obra_social'] ?? '---'); ?></span>
-                    </div>
                     <div class="info-item">
                         <span class="info-label">Plan / Cobertura</span>
                         <span class="info-value"><?php echo htmlspecialchars($datosPaciente['plan'] ?? '---'); ?></span>
                     </div>
 
-                    <!-- Fecha de Alta -->
+                    <div class="info-item">
+                        <span class="info-label">Obra Social</span>
+                        <span class="info-value"><?php echo htmlspecialchars($datosPaciente['obra_social'] ?? '---'); ?></span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Fecha de Nacimiento</span>
+                        <span class="info-value">
+                            <?php 
+                            echo !empty($datosPaciente['fecha_nacimiento']) 
+                                 ? date('d/m/Y', strtotime($datosPaciente['fecha_nacimiento'])) 
+                                 : '---'; 
+                            ?>
+                        </span>
+                    </div>
+
                     <div class="info-item" style="grid-column: 1 / -1;">
                         <span class="info-label">Fecha de Alta</span>
                         <span class="info-value">
@@ -113,11 +107,20 @@ if ($rolNormalizado == 'paciente') {
                             ?>
                         </span>
                     </div>
-                    <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
             
-            <!-- CAMPOS EDITABLES -->
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" name="nombre" value="<?php echo htmlspecialchars($nombre_usuario); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label>Apellido</label>
+                <input type="text" name="apellido" value="<?php echo htmlspecialchars($apellido_usuario); ?>" required>
+            </div>
+
             <div class="form-group">
                 <label>Correo Electrónico (Para recibir notificaciones)</label>
                 <input type="email" name="email" value="<?php echo htmlspecialchars($email_usuario); ?>" required>
@@ -125,12 +128,17 @@ if ($rolNormalizado == 'paciente') {
 
             <?php if ($rolNormalizado == 'paciente' && $datosPaciente): ?>
             <div class="form-group">
+                <label>DNI</label>
+                <input type="text" name="dni" value="<?php echo htmlspecialchars($datosPaciente['dni'] ?? ''); ?>" required>
+            </div>
+
+            <div class="form-group">
                 <label>Teléfono de Contacto</label>
                 <input type="text" name="telefono" value="<?php echo htmlspecialchars($datosPaciente['telefono'] ?? ''); ?>" required>
             </div>
             <?php endif; ?>
             
-            <button type="submit" class="btn-submit">Guardar Datos de Contacto</button>
+            <button type="submit" class="btn-submit">Guardar Datos</button>
         </form>
     </div>
 </body>

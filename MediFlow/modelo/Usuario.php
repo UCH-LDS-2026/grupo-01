@@ -8,37 +8,32 @@ class Usuario {
 
     // --------------------------------------------------------
     // FUNCIÓN DE TU COMPAÑERO (Para que el Login siga andando)
-    // --------------------------------------------------------
 public function iniciarSesion($email, $password) {
     $email = trim($email);
     
-    // Agregamos nombre y apellido al SELECT
-    $sql = "SELECT id_usuario, nombre, apellido, contrasena, rol FROM usuario WHERE email = ? AND activo = 1";
+    // Agregamos nombre, apellido, email y dni al SELECT sin tocar nada más
+    $sql = "SELECT id_usuario, nombre, apellido, email, dni, contrasena, rol FROM usuario WHERE email = ? AND activo = 1";
     $stmt = $this->conexion->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $resultado = $stmt->get_result();
 
-    if ($usuario = $resultado->fetch_assoc()) {
-        $hashAlmacenado = $usuario['contrasena'];
+        if ($usuario = $resultado->fetch_assoc()) {
+            $hashAlmacenado = $usuario['contrasena'];
 
-        if (password_verify($password, $hashAlmacenado) || $password === $hashAlmacenado) {
-            return $usuario; // Ahora este array contiene nombre y apellido
+            if (password_verify($password, $hashAlmacenado) || $password === $hashAlmacenado) {
+                return $usuario; // Ahora este array contiene nombre, apellido, email y dni
+            }
         }
+        return false;
     }
-    return false;
-}
 
-    // --------------------------------------------------------
-    // NUEVAS FUNCIONES ACTUALIZADAS
-    // --------------------------------------------------------
-public function crear($nombre, $apellido, $email, $password, $rol, $dni = '', $extras = []) {
+    public function crear($nombre, $apellido, $email, $password, $rol, $dni = '', $extras = []) {
         
         // --- PARCHE PARA TESTS ANTIGUOS ---
-        // Si un test viejo manda un Array en el lugar del DNI, lo acomodamos
         if (is_array($dni)) {
             $extras = $dni;
-            $dni = '12345678'; // Le inventamos un DNI válido para que el test pase
+            $dni = '12345678'; 
         }
         // ----------------------------------
 
@@ -70,13 +65,12 @@ public function crear($nombre, $apellido, $email, $password, $rol, $dni = '', $e
         $this->conexion->begin_transaction();
 
         try {
-            // 1. Guardar en la tabla padre 'usuario' (Ahora incluye DNI y Activo)
+            // 1. Guardar en la tabla padre 'usuario'
             $sql = "INSERT INTO usuario (nombre, apellido, email, contrasena, rol, activo, dni) VALUES (?, ?, ?, ?, ?, 1, ?)";
             $stmt = $this->conexion->prepare($sql);
             $stmt->bind_param("ssssss", $nombre, $apellido, $email, $passwordHash, $rol, $dni);
             $stmt->execute();
             
-            // Obtenemos el ID del usuario recién creado
             $id_usuario = $this->conexion->insert_id;
 
             // 2. Guardar en la tabla específica según el rol
@@ -99,12 +93,10 @@ public function crear($nombre, $apellido, $email, $password, $rol, $dni = '', $e
                 $stmt_pac->execute();
             }
 
-            // Si todo salió bien, confirmamos los cambios
             $this->conexion->commit();
             return true;
 
         } catch (Exception $e) {
-            // Si hubo algún error, revertimos todo
             $this->conexion->rollback();
             return false;
         }

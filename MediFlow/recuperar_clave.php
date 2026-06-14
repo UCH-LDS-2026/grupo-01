@@ -7,9 +7,7 @@ $mensaje = "";
 $tipo_mensaje = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Recibimos los 4 datos y les limpiamos los espacios en blanco de los bordes con trim()
-    $nombre = trim($_POST['nombre']);
-    $apellido = trim($_POST['apellido']);
+    // Recibimos los datos (Ignoramos nombre y apellido en la búsqueda para evitar errores por espacios o mayúsculas)
     $email = trim($_POST['email']);
     $dni = trim($_POST['dni']);
     
@@ -21,22 +19,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mensaje = "Las contraseñas nuevas no coinciden.";
         $tipo_mensaje = "error";
     } else {
-        // 2. Buscar si existe un usuario con esos 4 datos EXACTOS
-        $sql = "SELECT id_usuario FROM usuario WHERE email = ? AND dni = ? AND nombre = ? AND apellido = ?";
+        // 2. Buscar al usuario SOLO por Email y DNI
+        $sql = "SELECT id_usuario FROM usuario WHERE email = ? AND dni = ?";
         $stmt = $conexion->prepare($sql);
-        $stmt->bind_param("ssss", $email, $dni, $nombre, $apellido);
+        $stmt->bind_param("ss", $email, $dni);
         $stmt->execute();
         $resultado = $stmt->get_result();
 
         // 3. Si encontramos al usuario, le cambiamos la clave
         if ($resultado->num_rows > 0) {
-            // Agarramos el ID exacto de ese usuario para actualizar su clave
             $usuario_encontrado = $resultado->fetch_assoc();
             $id_usuario = $usuario_encontrado['id_usuario'];
 
+            // ¡SEGURIDAD ACTIVA! Encriptamos la nueva clave antes de guardarla
+            $clave_encriptada = password_hash($nueva_clave, PASSWORD_DEFAULT);
+
             $update_sql = "UPDATE usuario SET contrasena = ? WHERE id_usuario = ?";
             $update_stmt = $conexion->prepare($update_sql);
-            $update_stmt->bind_param("si", $nueva_clave, $id_usuario);
+            $update_stmt->bind_param("si", $clave_encriptada, $id_usuario);
             
             if ($update_stmt->execute()) {
                 $mensaje = "¡Contraseña actualizada con éxito! Ya puedes volver al login.";
@@ -46,8 +46,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $tipo_mensaje = "error";
             }
         } else {
-            // Si tan solo UN dato no coincide, rebota
-            $mensaje = "Los datos ingresados no coinciden con nuestros registros.";
+            // Este es el NUEVO mensaje que te confirmará que estás usando este código
+            $mensaje = "El Email o el DNI ingresados no coinciden con nuestros registros.";
             $tipo_mensaje = "error";
         }
     }

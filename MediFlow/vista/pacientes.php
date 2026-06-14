@@ -163,9 +163,15 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
 
             <div>
                 <label>Plan</label>
-                <input type="text" name="plan"
-                value="<?php echo $pacienteAEditar['plan'] ?? ''; ?>"
-                <?php echo ($esEdicion && $esMedico) ? 'readonly class="input-readonly"' : ''; ?>>
+                <?php if ($esEdicion && $esMedico): ?>
+                    <input type="text" name="plan" value="<?php echo htmlspecialchars($pacienteAEditar['plan'] ?? ''); ?>" readonly class="input-readonly">
+                <?php else: ?>
+                    <select name="plan" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                        <option value="PMO Inicial" <?php echo (($pacienteAEditar['plan'] ?? '') == 'PMO Inicial') ? 'selected' : ''; ?>>PMO Inicial</option>
+                        <option value="Plenitud 200" <?php echo (($pacienteAEditar['plan'] ?? '') == 'Plenitud 200') ? 'selected' : ''; ?>>Plenitud 200</option>
+                        <option value="MediPro" <?php echo (($pacienteAEditar['plan'] ?? '') == 'MediPro') ? 'selected' : ''; ?>>MediPro</option>
+                    </select>
+                <?php endif; ?>
             </div>
 
             <?php
