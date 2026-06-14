@@ -14,6 +14,7 @@ $rol = strtolower($usuario['rol'] ?? '');
 
 // Traemos todos los pacientes por defecto para que el buscador en vivo de JS tenga todos los datos
 $listaPacientes = $pacienteModelo->listar();
+$listaPlanes = $pacienteModelo->obtenerPlanes();
 
 $esEdicion = false;
 $pacienteAEditar = null;
@@ -162,14 +163,19 @@ label { font-weight:bold; font-size:13px; display:block; margin-bottom:4px; }
             </div>
 
             <div>
+    <div>
                 <label>Plan</label>
                 <?php if ($esEdicion && $esMedico): ?>
                     <input type="text" name="plan" value="<?php echo htmlspecialchars($pacienteAEditar['plan'] ?? ''); ?>" readonly class="input-readonly">
                 <?php else: ?>
                     <select name="plan" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-                        <option value="PMO Inicial" <?php echo (($pacienteAEditar['plan'] ?? '') == 'PMO Inicial') ? 'selected' : ''; ?>>PMO Inicial</option>
-                        <option value="Plenitud 200" <?php echo (($pacienteAEditar['plan'] ?? '') == 'Plenitud 200') ? 'selected' : ''; ?>>Plenitud 200</option>
-                        <option value="MediPro" <?php echo (($pacienteAEditar['plan'] ?? '') == 'MediPro') ? 'selected' : ''; ?>>MediPro</option>
+                        <option value="">Seleccione un plan...</option>
+                        <?php foreach ($listaPlanes as $planBd): ?>
+                            <option value="<?php echo htmlspecialchars($planBd['nombre']); ?>" 
+                                <?php echo (($pacienteAEditar['plan'] ?? '') == $planBd['nombre']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($planBd['nombre']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 <?php endif; ?>
             </div>

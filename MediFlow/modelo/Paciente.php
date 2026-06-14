@@ -49,5 +49,13 @@ class Paciente {
         $stmt->bind_param("i", $id);
         return $stmt->execute();
     }
+    // Obtener lista parametrizada de planes
+    public function obtenerPlanes() {
+        $sql = "SELECT nombre FROM planes ORDER BY nombre ASC";
+        $resultado = $this->conexion->query($sql);
+        if ($resultado) {
+            return $resultado->fetch_all(MYSQLI_ASSOC);
+        }
+        return [];
+    }
 }
-?>
