@@ -31,3 +31,5 @@ MediFlow/uploads/
 test-report.php
 
 .phpunit.cache/
+# Forzar siempre la subida de la librería QR
+!src/phpqrcode/
