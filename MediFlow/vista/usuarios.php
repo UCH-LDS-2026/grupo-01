@@ -3,7 +3,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
-// SEGURIDAD: Solo el Administrador (admin) puede gestionar usuarios
 $rolUsuarioOriginal = $_SESSION['usuario']['rol'] ?? '';
 $rolNormalizado = strtolower(trim($rolUsuarioOriginal));
 
@@ -30,9 +29,11 @@ $listaUsuarios = $usuarioModelo->listar();
         .container-ancho { max-width: 95%; margin: 30px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 30px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
         .badge { padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; text-transform: capitalize; background: #e0f2fe; color: #0369a1; }
+        .badge-inactivo { background: #fef2f2; color: #dc2626; }
         .btn-eliminar { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; }
-        /* Oculta los campos dinámicos por defecto */
         .extra-field { display: none; }
+        .filtros-container { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .filtros-container select, .filtros-container input { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; }
     </style>
 </head>
 <body>
@@ -105,13 +106,15 @@ $listaUsuarios = $usuarioModelo->listar();
                         <label>Teléfono</label>
                         <input type="text" name="telefono" placeholder="Ej: 2617158502">
                     </div>
+                    
                     <div class="form-group extra-field" data-rol="paciente">
                         <label>Plan</label>
-                        <input type="text" name="plan" class="req-dinamico" placeholder="Ej: Plenitud 200">
-                    </div>
-                    <div class="form-group extra-field" data-rol="paciente">
-                        <label>N° Afiliado</label>
-                        <input type="text" name="nro_afiliado" class="req-dinamico" placeholder="Ej: F-00001-01">
+                        <select name="plan" class="req-dinamico" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;">
+                            <option value="">-- Seleccione un Plan --</option>
+                            <option value="PMO Inicial">PMO Inicial</option>
+                            <option value="Plenitud 200">Plenitud 200</option>
+                            <option value="MediPro">MediPro</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -123,6 +126,26 @@ $listaUsuarios = $usuarioModelo->listar();
 
         <div class="card">
             <h2>📋 Padrón de Usuarios del Sistema</h2>
+            
+            <div class="filtros-container">
+                <strong>Filtros:</strong>
+                <input type="text" id="filtro-texto" placeholder="🔍 Buscar por Nombre o DNI..." onkeyup="filtrarUsuarios()" style="flex-grow: 1;">
+                
+                <select id="filtro-rol" onchange="filtrarUsuarios()">
+                    <option value="todos">Todos los roles</option>
+                    <option value="admin">Administrador</option>
+                    <option value="administrativo">Administrativo</option>
+                    <option value="medico">Médico</option>
+                    <option value="auditor">Auditor</option>
+                    <option value="paciente">Paciente</option>
+                </select>
+                <select id="filtro-estado" onchange="filtrarUsuarios()">
+                    <option value="todos">Todos los estados</option>
+                    <option value="1">Activos</option>
+                    <option value="0">Dados de baja</option>
+                </select>
+            </div>
+
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -130,26 +153,38 @@ $listaUsuarios = $usuarioModelo->listar();
                             <th>ID</th>
                             <th>Nombre Completo</th>
                             <th>DNI</th>
-                            <th>Email (Usuario)</th>
+                            <th>Email</th>
                             <th>Rol</th>
+                            <th>Fecha Alta</th>
+                            <th>Fecha Baja</th>
                             <th style="text-align: center;">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tabla-usuarios">
                         <?php if (empty($listaUsuarios)): ?>
                             <tr>
-                                <td colspan="6" class="no-data">No hay usuarios registrados.</td>
+                                <td colspan="8" class="no-data">No hay usuarios registrados.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($listaUsuarios as $u): ?>
-                                <tr>
-                                    <td><strong>#<?php echo htmlspecialchars($u['id_usuario']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($u['apellido'] . ', ' . $u['nombre']); ?></td>
+                                <tr class="fila-usuario" data-rol="<?php echo strtolower($u['rol'] ?? ''); ?>" data-estado="<?php echo $u['activo'] ?? 1; ?>">
+                                    <td><strong>#<?php echo htmlspecialchars($u['id_usuario'] ?? ''); ?></strong></td>
+                                    <td><?php echo htmlspecialchars(($u['apellido'] ?? '') . ', ' . ($u['nombre'] ?? '')); ?></td>
                                     <td><?php echo htmlspecialchars($u['dni'] ?? '---'); ?></td>
-                                    <td><?php echo htmlspecialchars($u['email']); ?></td>
-                                    <td><span class="badge"><?php echo htmlspecialchars($u['rol']); ?></span></td>
+                                    <td><?php echo htmlspecialchars($u['email'] ?? ''); ?></td>
+                                    <td>
+                                        <span class="badge <?php echo (isset($u['activo']) && $u['activo'] == 0) ? 'badge-inactivo' : ''; ?>">
+                                            <?php echo htmlspecialchars($u['rol'] ?? ''); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo !empty($u['fecha_alta']) ? date('d/m/Y H:i', strtotime($u['fecha_alta'])) : '---'; ?></td>
+                                    <td><?php echo !empty($u['fecha_baja']) ? date('d/m/Y H:i', strtotime($u['fecha_baja'])) : '---'; ?></td>
                                     <td style="text-align: center;">
-                                        <a href="../controlador/usuarioControlador.php?accion=eliminar&id=<?php echo $u['id_usuario']; ?>" class="btn-eliminar" onclick="return confirm('¿Estás seguro de eliminar este usuario? Perderá el acceso al sistema.');">Eliminar</a>
+                                        <?php if (!isset($u['activo']) || $u['activo'] == 1): ?>
+                                            <a href="../controlador/usuarioControlador.php?accion=eliminar&id=<?php echo $u['id_usuario']; ?>" class="btn-eliminar" onclick="return confirm('¿Dar de baja a este usuario? Ya no podrá acceder al sistema.');">Dar de Baja</a>
+                                        <?php else: ?>
+                                            <span style="color: #64748b; font-size: 12px; font-weight: bold;">Desactivado</span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -164,28 +199,47 @@ $listaUsuarios = $usuarioModelo->listar();
     <script>
         document.getElementById('select-rol').addEventListener('change', function() {
             const selectedRol = this.value;
-            
-            // Recorremos todos los div ocultos "extra-field"
             document.querySelectorAll('.extra-field').forEach(div => {
-                const input = div.querySelector('input');
-                
-                // Si el div corresponde al rol seleccionado, lo mostramos
+                const elements = div.querySelectorAll('input, select');
                 if (div.getAttribute('data-rol') === selectedRol) {
                     div.style.display = 'block';
-                    // Obligamos a rellenarlo solo a los que tienen la clase req-dinamico
-                    if(input && input.classList.contains('req-dinamico')) {
-                        input.required = true;
-                    }
+                    elements.forEach(el => {
+                        if(el.classList.contains('req-dinamico')) el.required = true;
+                    });
                 } else {
-                    // Si no corresponde, lo ocultamos y limpiamos
                     div.style.display = 'none';
-                    if(input) {
-                        input.required = false;
-                        input.value = ''; // Limpiamos para evitar basura en el envío
-                    }
+                    elements.forEach(el => {
+                        el.required = false;
+                        el.value = ''; 
+                    });
                 }
             });
         });
+
+        function filtrarUsuarios() {
+            const filtroTexto = document.getElementById('filtro-texto').value.toLowerCase();
+            const filtroRol = document.getElementById('filtro-rol').value.toLowerCase();
+            const filtroEstado = document.getElementById('filtro-estado').value;
+            const filas = document.querySelectorAll('.fila-usuario');
+
+            filas.forEach(fila => {
+                const rolFila = fila.getAttribute('data-rol');
+                const estadoFila = fila.getAttribute('data-estado');
+                
+                const nombreFila = fila.cells[1].innerText.toLowerCase();
+                const dniFila = fila.cells[2].innerText.toLowerCase();
+
+                const coincideTexto = nombreFila.includes(filtroTexto) || dniFila.includes(filtroTexto);
+                const coincideRol = (filtroRol === 'todos' || rolFila === filtroRol);
+                const coincideEstado = (filtroEstado === 'todos' || estadoFila === filtroEstado);
+
+                if (coincideTexto && coincideRol && coincideEstado) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>

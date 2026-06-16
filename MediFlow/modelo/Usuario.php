@@ -6,23 +6,20 @@ class Usuario {
         $this->conexion = $conexion;
     }
 
-    // --------------------------------------------------------
-    // FUNCIÓN DE TU COMPAÑERO (Para que el Login siga andando)
-public function iniciarSesion($email, $password) {
-    $email = trim($email);
-    
-    // Agregamos nombre, apellido, email y dni al SELECT sin tocar nada más
-    $sql = "SELECT id_usuario, nombre, apellido, email, dni, contrasena, rol FROM usuario WHERE email = ? AND activo = 1";
-    $stmt = $this->conexion->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
+    public function iniciarSesion($email, $password) {
+        $email = trim($email);
+        
+        $sql = "SELECT id_usuario, nombre, apellido, email, dni, contrasena, rol FROM usuario WHERE email = ? AND activo = 1";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
 
         if ($usuario = $resultado->fetch_assoc()) {
             $hashAlmacenado = $usuario['contrasena'];
 
             if (password_verify($password, $hashAlmacenado) || $password === $hashAlmacenado) {
-                return $usuario; // Ahora este array contiene nombre, apellido, email y dni
+                return $usuario; 
             }
         }
         return false;
@@ -30,12 +27,10 @@ public function iniciarSesion($email, $password) {
 
     public function crear($nombre, $apellido, $email, $password, $rol, $dni = '', $extras = []) {
         
-        // --- PARCHE PARA TESTS ANTIGUOS ---
         if (is_array($dni)) {
             $extras = $dni;
             $dni = '12345678'; 
         }
-        // ----------------------------------
 
         $nombre = trim($nombre);
         $apellido = trim($apellido);
@@ -52,7 +47,7 @@ public function iniciarSesion($email, $password) {
         }
 
         if ($rol === 'paciente') {
-            if (empty($extras['fecha_nacimiento']) || empty($extras['telefono']) || empty($extras['plan']) || empty($extras['nro_afiliado'])) {
+            if (empty($extras['fecha_nacimiento']) || empty($extras['telefono']) || empty($extras['plan'])) {
                 return false;
             }
             if (!$this->validarTelefono($extras['telefono'])) {
@@ -65,7 +60,6 @@ public function iniciarSesion($email, $password) {
         $this->conexion->begin_transaction();
 
         try {
-            // 1. Guardar en la tabla padre 'usuario'
             $sql = "INSERT INTO usuario (nombre, apellido, email, contrasena, rol, activo, dni) VALUES (?, ?, ?, ?, ?, 1, ?)";
             $stmt = $this->conexion->prepare($sql);
             $stmt->bind_param("ssssss", $nombre, $apellido, $email, $passwordHash, $rol, $dni);
@@ -73,7 +67,6 @@ public function iniciarSesion($email, $password) {
             
             $id_usuario = $this->conexion->insert_id;
 
-            // 2. Guardar en la tabla específica según el rol
             if ($rol == 'medico') {
                 $sql_med = "INSERT INTO medico (id_usuario, matricula, especialidad) VALUES (?, ?, ?)";
                 $stmt_med = $this->conexion->prepare($sql_med);
@@ -87,9 +80,16 @@ public function iniciarSesion($email, $password) {
                 $stmt_aud->execute();
 
             } elseif ($rol == 'paciente') {
+                $query_max = "SELECT MAX(id_paciente) as max_id FROM paciente";
+                $res_max = $this->conexion->query($query_max);
+                $row_max = $res_max->fetch_assoc();
+                $next_id = ($row_max['max_id'] ?? 0) + 1;
+                
+                $nro_afiliado_generado = 'F-' . str_pad($next_id, 5, '0', STR_PAD_LEFT) . '-01';
+
                 $sql_pac = "INSERT INTO paciente (nombre, apellido, dni, fecha_nacimiento, email, telefono, plan, nro_afiliado, fecha_alta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                 $stmt_pac = $this->conexion->prepare($sql_pac);
-                $stmt_pac->bind_param("ssssssss", $nombre, $apellido, $dni, $extras['fecha_nacimiento'], $email, $extras['telefono'], $extras['plan'], $extras['nro_afiliado']);
+                $stmt_pac->bind_param("ssssssss", $nombre, $apellido, $dni, $extras['fecha_nacimiento'], $email, $extras['telefono'], $extras['plan'], $nro_afiliado_generado);
                 $stmt_pac->execute();
             }
 
@@ -115,7 +115,7 @@ public function iniciarSesion($email, $password) {
     }
 
     public function listar() {
-        $sql = "SELECT id_usuario, nombre, apellido, email, rol FROM usuario ORDER BY id_usuario DESC";
+        $sql = "SELECT id_usuario, nombre, apellido, email, dni, rol, activo, fecha_alta, fecha_baja FROM usuario ORDER BY id_usuario DESC";
         $resultado = $this->conexion->query($sql);
         if ($resultado) {
             return $resultado->fetch_all(MYSQLI_ASSOC);
@@ -124,14 +124,14 @@ public function iniciarSesion($email, $password) {
     }
 
     public function eliminar($id_usuario) {
-        $sql = "DELETE FROM usuario WHERE id_usuario = ?";
+        $sql = "UPDATE usuario SET activo = 0, fecha_baja = NOW() WHERE id_usuario = ?";
         $stmt = $this->conexion->prepare($sql);
         $stmt->bind_param("i", $id_usuario);
         return $stmt->execute();
     }
 
     public function listarMedicos() {
-        $sql = "SELECT id_usuario, nombre, apellido FROM usuario WHERE LOWER(TRIM(rol)) = 'medico' ORDER BY apellido ASC";
+        $sql = "SELECT id_usuario, nombre, apellido FROM usuario WHERE LOWER(TRIM(rol)) = 'medico' AND activo = 1 ORDER BY apellido ASC";
         $resultado = $this->conexion->query($sql);
         if ($resultado) {
             return $resultado->fetch_all(MYSQLI_ASSOC);
