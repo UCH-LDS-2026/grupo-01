@@ -44,6 +44,7 @@ if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin' || $rolNormalizad
 }
 // -----------------------------------------------------------
 
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -67,13 +68,13 @@ if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin' || $rolNormalizad
 
         .table-responsive table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
         .table-responsive th { padding: 15px 12px; background-color: #f1f5f9; text-align: left; border-bottom: 2px solid #e2e8f0; }
-        .table-responsive td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; }
-        .badge { font-weight: 600; padding: 5px 10px; border-radius: 20px; font-size: 12px; text-transform: capitalize; }
+        .table-responsive td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        .badge { font-weight: 600; padding: 5px 10px; border-radius: 20px; font-size: 12px; text-transform: capitalize; display: inline-block; }
         .badge-pendiente { background: #fef08a; color: #854d0e; }
         .badge-observada { background: #fed7aa; color: #9a3412; }
         .badge-aprobada { background: #bbf7d0; color: #166534; }
         .badge-rechazada { background: #fecaca; color: #991b1b; }
-        .btn-icon { background: #f1f5f9; color: #0f172a; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s;}
+        .btn-icon { background: #f1f5f9; color: #0f172a; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; display: inline-block; margin-bottom: 5px; }
         .btn-icon:hover { opacity: 0.8; }
         .btn-print { background-color: #22c55e; color: white; margin-left: 5px;}
         .paginacion { margin-top: 20px; display: flex; justify-content: center; gap: 8px; }
@@ -133,7 +134,7 @@ if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin' || $rolNormalizad
                     </select>
                 </div>
                 <div class="filtro-item" style="justify-content: flex-end;">
-                    <button id="btnLimpiarFiltros" class="btn-icon" style="background: #e2e8f0;">Limpiar Filtros</button>
+                    <button id="btnLimpiarFiltros" class="btn-icon" style="background: #e2e8f0; margin-bottom: 0;">Limpiar Filtros</button>
                 </div>
             </div>
             <div class="table-responsive">
@@ -161,11 +162,34 @@ if ($rolNormalizado == 'auditor' || $rolNormalizado == 'admin' || $rolNormalizad
                                 <td class="col-dni"><?php echo htmlspecialchars($s['dni'] ?? '---'); ?></td>
                                 <td><?php echo htmlspecialchars($s['nombre_practica'] ?? '---'); ?></td>
                                 <td><?php echo ucfirst($s['prioridad']); ?></td>
-                                <td><span class="badge <?php echo $clase; ?>"><?php echo htmlspecialchars($s['estado']); ?></span></td>
+                                
+                                <td>
+                                    <span class="badge <?php echo $clase; ?>"><?php echo htmlspecialchars($s['estado']); ?></span>
+                                    
+                                    <?php if (!empty($s['motivo_correccion']) && in_array($estado, ['observada', 'rechazada'])): ?>
+                                        <div style="font-size: 11px; color: #64748b; margin-top: 5px; max-width: 180px;">
+                                            <strong>Motivo:</strong> <?php echo htmlspecialchars($s['motivo_correccion']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+                                
                                 <td>
                                     <a href="ver_solicitud.php?id=<?php echo $s['id_solicitud']; ?>" target="_blank" class="btn-icon">👁️ Ver</a>
                                     <?php if ($estado == 'aprobada'): ?>
                                         <a href="imprimir_solicitud.php?id=<?php echo $s['id_solicitud']; ?>" target="_blank" class="btn-icon btn-print">🖨️ Orden</a>
+                                    <?php endif; ?>
+                                    
+                                    <?php 
+                                    $archivosAdjuntos = $solicitudModelo->obtenerArchivos($s['id_solicitud']); 
+                                    if (!empty($archivosAdjuntos)): 
+                                    ?>
+                                        <div style="margin-top: 5px; display:flex; flex-direction:column; gap:4px;">
+                                            <?php foreach ($archivosAdjuntos as $archivo): ?>
+                                                <a href="../uploads/<?php echo htmlspecialchars($archivo['ruta']); ?>" target="_blank" style="font-size:11px; color:#0284c7; text-decoration:none; background:#e0f2fe; padding:2px 6px; border-radius:4px; display:inline-block; width:fit-content;">
+                                                    📎 <?php echo htmlspecialchars($archivo['nombre']); ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
                                 </td>
                             </tr>

@@ -24,10 +24,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
             
             if ($id_solicitud) {
                 // Procesamiento seguro a la tabla ARCHIVO
-                if (isset($_FILES['adjuntos'])) {
+                if (isset($_FILES['adjuntos']) && $_FILES['adjuntos']['error'][0] != UPLOAD_ERR_NO_FILE) {
                     $totalArchivos = count($_FILES['adjuntos']['name']);
+                    
+                    // Aseguramos la ruta absoluta a la carpeta uploads en la raíz de tu proyecto
                     $carpetaDestino = __DIR__ . '/../uploads/';
-                    if (!file_exists($carpetaDestino)) { mkdir($carpetaDestino, 0777, true); }
+                    if (!file_exists($carpetaDestino)) { 
+                        mkdir($carpetaDestino, 0777, true); 
+                    }
 
                     for ($i = 0; $i < $totalArchivos; $i++) {
                         if ($_FILES['adjuntos']['error'][$i] === UPLOAD_ERR_OK) {
@@ -35,7 +39,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
                             $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
                             $nombreUnico = uniqid('estudio_') . '_' . $i . '.' . $extension;
                             
-                            if (move_uploaded_file($_FILES['adjuntos']['tmp_name'][$i], $carpetaDestino . $nombreUnico)) {
+                            $rutaFinal = $carpetaDestino . $nombreUnico;
+                            
+                            if (move_uploaded_file($_FILES['adjuntos']['tmp_name'][$i], $rutaFinal)) {
                                 // Impacta directo en la DB
                                 $solicitudModelo->guardarArchivo($id_solicitud, $nombreOriginal, $extension, $nombreUnico);
                             }
@@ -66,23 +72,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion'])) {
             $solicitudModelo->corregir($id_solicitud, $id_paciente, $id_medico, $id_practica, $fecha, $prioridad, $diagnostico, null);
             
             // Subimos archivos nuevos si los hay
-            if (isset($_FILES['adjuntos'])) {
-                $totalArchivos = count($_FILES['adjuntos']['name']);
-                $carpetaDestino = __DIR__ . '/../uploads/';
-                if (!file_exists($carpetaDestino)) { mkdir($carpetaDestino, 0777, true); }
+// Procesamiento seguro a la tabla ARCHIVO
+                if (isset($_FILES['adjuntos']) && $_FILES['adjuntos']['error'][0] != UPLOAD_ERR_NO_FILE) {
+                    $totalArchivos = count($_FILES['adjuntos']['name']);
+                    
+                    // Aseguramos la ruta absoluta a la carpeta uploads en la raíz de tu proyecto
+                    $carpetaDestino = __DIR__ . '/../uploads/';
+                    if (!file_exists($carpetaDestino)) { 
+                        mkdir($carpetaDestino, 0777, true); 
+                    }
 
-                for ($i = 0; $i < $totalArchivos; $i++) {
-                    if ($_FILES['adjuntos']['error'][$i] === UPLOAD_ERR_OK) {
-                        $nombreOriginal = basename($_FILES['adjuntos']['name'][$i]);
-                        $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
-                        $nombreUnico = uniqid('corregido_') . '_' . $i . '.' . $extension;
-                        
-                        if (move_uploaded_file($_FILES['adjuntos']['tmp_name'][$i], $carpetaDestino . $nombreUnico)) {
-                            $solicitudModelo->guardarArchivo($id_solicitud, $nombreOriginal, $extension, $nombreUnico);
+                    for ($i = 0; $i < $totalArchivos; $i++) {
+                        if ($_FILES['adjuntos']['error'][$i] === UPLOAD_ERR_OK) {
+                            $nombreOriginal = basename($_FILES['adjuntos']['name'][$i]);
+                            $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
+                            $nombreUnico = uniqid('estudio_') . '_' . $i . '.' . $extension;
+                            
+                            $rutaFinal = $carpetaDestino . $nombreUnico;
+                            
+                            if (move_uploaded_file($_FILES['adjuntos']['tmp_name'][$i], $rutaFinal)) {
+                                // Impacta directo en la DB
+                                $solicitudModelo->guardarArchivo($id_solicitud, $nombreOriginal, $extension, $nombreUnico);
+                            }
                         }
                     }
                 }
-            }
             header("Location: ../vista/notificaciones.php?exito=1"); 
             exit;
         } else {

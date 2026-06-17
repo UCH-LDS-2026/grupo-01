@@ -63,7 +63,8 @@ class Solicitud {
                        p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan,
                        pr.nombre as nombre_practica, pr.descripcion as desc_practica,
                        u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico, 
-                       m.especialidad as especialidad_medico, m.matricula as matricula_medico
+                       m.especialidad as especialidad_medico, m.matricula as matricula_medico,
+                       (SELECT observaciones FROM evaluacion e WHERE e.id_solicitud = s.id_solicitud ORDER BY e.id_evaluacion DESC LIMIT 1) as motivo_correccion
                 FROM solicitud s
                 LEFT JOIN paciente p ON s.id_paciente = p.id_paciente
                 LEFT JOIN practica pr ON s.id_practica = pr.id_practica
@@ -130,10 +131,10 @@ class Solicitud {
     }
 
    public function obtenerPendientesFiltradas($filtros = []) {
-        // CORRECCIÓN: Agregamos p.dni a la selección
         $sql = "SELECT s.*, p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni,
                        u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico,
-                       pr.nombre as nombre_practica
+                       pr.nombre as nombre_practica,
+                       (SELECT observaciones FROM evaluacion e WHERE e.id_solicitud = s.id_solicitud ORDER BY e.id_evaluacion DESC LIMIT 1) as motivo_correccion
                 FROM solicitud s
                 LEFT JOIN paciente p ON s.id_paciente = p.id_paciente
                 LEFT JOIN usuario u_medico ON s.id_medico = u_medico.id_usuario
@@ -177,6 +178,7 @@ class Solicitud {
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
+    
     public function contarPendientes() {
         $sql = "SELECT COUNT(*) as total FROM solicitud WHERE estado = 'pendiente'";
         $resultado = $this->conexion->query($sql);
@@ -189,7 +191,8 @@ class Solicitud {
                        p.nombre as nombre_paciente, p.apellido as apellido_paciente, p.dni, p.nro_afiliado, p.plan,
                        pr.nombre as nombre_practica, pr.descripcion as desc_practica,
                        u_medico.nombre as nombre_medico, u_medico.apellido as apellido_medico, 
-                       m.especialidad as especialidad_medico, m.matricula as matricula_medico
+                       m.especialidad as especialidad_medico, m.matricula as matricula_medico,
+                       (SELECT observaciones FROM evaluacion e WHERE e.id_solicitud = s.id_solicitud ORDER BY e.id_evaluacion DESC LIMIT 1) as motivo_correccion
                 FROM solicitud s
                 INNER JOIN paciente p ON s.id_paciente = p.id_paciente
                 LEFT JOIN practica pr ON s.id_practica = pr.id_practica

@@ -1,0 +1,5 @@
+COMANDO PARA LOS TESTS:
+cd C:\xampp\htdocs\mediflow\grupo-01\MediFlow ; C:\xampp\php\php.exe test-report.php
+
+COMANDO PARA TEST DE COBERTURA: Para ver el % del test de cobertura poner en la terminal
+ php -d xdebug.mode=coverage phpunit --coverage-html reporte-cobertura

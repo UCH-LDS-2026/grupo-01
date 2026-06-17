@@ -9,5 +9,11 @@
             <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">modelo</directory>
+            <directory suffix=".php">controlador</directory>
+        </include>
+    </source>
 </phpunit>
 

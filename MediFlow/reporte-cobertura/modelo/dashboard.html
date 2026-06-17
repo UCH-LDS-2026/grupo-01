@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for C:\xampp\htdocs\mediflow\grupo-01\MediFlow\modelo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/nv.d3.min.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=10.1.16" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">C:\xampp\htdocs\mediflow\grupo-01\MediFlow</a></li>
+         <li class="breadcrumb-item"><a href="index.html">modelo</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Plan.php.html#2">Plan</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Practica.php.html#2">Practica</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#2">Solicitud</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Paciente.php.html#2">Paciente</a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="Usuario.php.html#2">Usuario</a></td><td class="text-right">55%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Solicitud.php.html#2">Solicitud</a></td><td class="text-right">756</td></tr>
+       <tr><td><a href="Usuario.php.html#2">Usuario</a></td><td class="text-right">145</td></tr>
+       <tr><td><a href="Practica.php.html#2">Practica</a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Paciente.php.html#2">Paciente</a></td><td class="text-right">19</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Paciente.php.html#16"><abbr title="Paciente::listar">listar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Paciente.php.html#39"><abbr title="Paciente::editar">editar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Paciente.php.html#46"><abbr title="Paciente::eliminar">eliminar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Paciente.php.html#53"><abbr title="Paciente::obtenerPlanes">obtenerPlanes</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Plan.php.html#4"><abbr title="Plan::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Plan.php.html#6"><abbr title="Plan::listar">listar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Plan.php.html#12"><abbr title="Plan::crear">crear</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Plan.php.html#19"><abbr title="Plan::eliminar">eliminar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Practica.php.html#5"><abbr title="Practica::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Practica.php.html#9"><abbr title="Practica::crear">crear</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Practica.php.html#16"><abbr title="Practica::listar">listar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Practica.php.html#25"><abbr title="Practica::eliminar">eliminar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#5"><abbr title="Solicitud::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#9"><abbr title="Solicitud::crear">crear</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#21"><abbr title="Solicitud::guardarArchivo">guardarArchivo</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#29"><abbr title="Solicitud::obtenerArchivos">obtenerArchivos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#38"><abbr title="Solicitud::evaluar">evaluar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#61"><abbr title="Solicitud::listar">listar</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#81"><abbr title="Solicitud::actualizarEstado">actualizarEstado</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#89"><abbr title="Solicitud::obtenerObservadasPorMedico">obtenerObservadasPorMedico</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#102"><abbr title="Solicitud::obtenerPorId">obtenerPorId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#110"><abbr title="Solicitud::corregir">corregir</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#123"><abbr title="Solicitud::obtenerEstadisticas">obtenerEstadisticas</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#133"><abbr title="Solicitud::obtenerPendientesFiltradas">obtenerPendientesFiltradas</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#182"><abbr title="Solicitud::contarPendientes">contarPendientes</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#189"><abbr title="Solicitud::listarPorEmailPaciente">listarPorEmailPaciente</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#210"><abbr title="Solicitud::obtenerEstadisticasPorPaciente">obtenerEstadisticasPorPaciente</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Solicitud.php.html#225"><abbr title="Solicitud::obtenerDatosPacientePorEmail">obtenerDatosPacientePorEmail</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Usuario.php.html#133"><abbr title="Usuario::listarMedicos">listarMedicos</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Usuario.php.html#28"><abbr title="Usuario::crear">crear</abbr></a></td><td class="text-right">46%</td></tr>
+       <tr><td><a href="Usuario.php.html#9"><abbr title="Usuario::iniciarSesion">iniciarSesion</abbr></a></td><td class="text-right">72%</td></tr>
+       <tr><td><a href="Usuario.php.html#117"><abbr title="Usuario::listar">listar</abbr></a></td><td class="text-right">80%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Usuario.php.html#28"><abbr title="Usuario::crear">crear</abbr></a></td><td class="text-right">79</td></tr>
+       <tr><td><a href="Solicitud.php.html#133"><abbr title="Solicitud::obtenerPendientesFiltradas">obtenerPendientesFiltradas</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Paciente.php.html#53"><abbr title="Paciente::obtenerPlanes">obtenerPlanes</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Practica.php.html#16"><abbr title="Practica::listar">listar</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Solicitud.php.html#9"><abbr title="Solicitud::crear">crear</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Solicitud.php.html#38"><abbr title="Solicitud::evaluar">evaluar</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Solicitud.php.html#61"><abbr title="Solicitud::listar">listar</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Solicitud.php.html#110"><abbr title="Solicitud::corregir">corregir</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Solicitud.php.html#189"><abbr title="Solicitud::listarPorEmailPaciente">listarPorEmailPaciente</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Usuario.php.html#133"><abbr title="Usuario::listarMedicos">listarMedicos</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Usuario.php.html#9"><abbr title="Usuario::iniciarSesion">iniciarSesion</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="Usuario.php.html#117"><abbr title="Usuario::listar">listar</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 10.1.16</a> using <a href="https://www.php.net/" target="_top">PHP 8.2.12</a> and <a href="https://phpunit.de/">PHPUnit 10.5.63</a> at Thu Jun 18 0:40:43 CEST 2026.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/jquery.min.js?v=10.1.16" type="text/javascript"></script>
+  <script src="../_js/d3.min.js?v=10.1.16" type="text/javascript"></script>
+  <script src="../_js/nv.d3.min.js?v=10.1.16" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([3,0,0,0,0,0,2,0,0,0,0,1], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([29,0,0,0,0,1,0,0,1,1,0,11], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[100,2,"<a href=\"Evaluacion.php.html#2\">Evaluacion<\/a>"],[50,9,"<a href=\"Paciente.php.html#2\">Paciente<\/a>"],[0,4,"<a href=\"Plan.php.html#2\">Plan<\/a>"],[0,5,"<a href=\"Practica.php.html#2\">Practica<\/a>"],[0,27,"<a href=\"Solicitud.php.html#2\">Solicitud<\/a>"],[55.12820512820513,35,"<a href=\"Usuario.php.html#2\">Usuario<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"Evaluacion.php.html#5\">Evaluacion::__construct<\/a>"],[100,1,"<a href=\"Evaluacion.php.html#9\">Evaluacion::crear<\/a>"],[100,1,"<a href=\"Paciente.php.html#5\">Paciente::__construct<\/a>"],[100,1,"<a href=\"Paciente.php.html#9\">Paciente::crear<\/a>"],[0,1,"<a href=\"Paciente.php.html#16\">Paciente::listar<\/a>"],[100,1,"<a href=\"Paciente.php.html#22\">Paciente::buscarPorId<\/a>"],[100,1,"<a href=\"Paciente.php.html#30\">Paciente::buscarPorTexto<\/a>"],[0,1,"<a href=\"Paciente.php.html#39\">Paciente::editar<\/a>"],[0,1,"<a href=\"Paciente.php.html#46\">Paciente::eliminar<\/a>"],[0,2,"<a href=\"Paciente.php.html#53\">Paciente::obtenerPlanes<\/a>"],[0,1,"<a href=\"Plan.php.html#4\">Plan::__construct<\/a>"],[0,1,"<a href=\"Plan.php.html#6\">Plan::listar<\/a>"],[0,1,"<a href=\"Plan.php.html#12\">Plan::crear<\/a>"],[0,1,"<a href=\"Plan.php.html#19\">Plan::eliminar<\/a>"],[0,1,"<a href=\"Practica.php.html#5\">Practica::__construct<\/a>"],[0,1,"<a href=\"Practica.php.html#9\">Practica::crear<\/a>"],[0,2,"<a href=\"Practica.php.html#16\">Practica::listar<\/a>"],[0,1,"<a href=\"Practica.php.html#25\">Practica::eliminar<\/a>"],[0,1,"<a href=\"Solicitud.php.html#5\">Solicitud::__construct<\/a>"],[0,2,"<a href=\"Solicitud.php.html#9\">Solicitud::crear<\/a>"],[0,1,"<a href=\"Solicitud.php.html#21\">Solicitud::guardarArchivo<\/a>"],[0,1,"<a href=\"Solicitud.php.html#29\">Solicitud::obtenerArchivos<\/a>"],[0,2,"<a href=\"Solicitud.php.html#38\">Solicitud::evaluar<\/a>"],[0,2,"<a href=\"Solicitud.php.html#61\">Solicitud::listar<\/a>"],[0,1,"<a href=\"Solicitud.php.html#81\">Solicitud::actualizarEstado<\/a>"],[0,1,"<a href=\"Solicitud.php.html#89\">Solicitud::obtenerObservadasPorMedico<\/a>"],[0,1,"<a href=\"Solicitud.php.html#102\">Solicitud::obtenerPorId<\/a>"],[0,2,"<a href=\"Solicitud.php.html#110\">Solicitud::corregir<\/a>"],[0,1,"<a href=\"Solicitud.php.html#123\">Solicitud::obtenerEstadisticas<\/a>"],[0,7,"<a href=\"Solicitud.php.html#133\">Solicitud::obtenerPendientesFiltradas<\/a>"],[0,1,"<a href=\"Solicitud.php.html#182\">Solicitud::contarPendientes<\/a>"],[0,2,"<a href=\"Solicitud.php.html#189\">Solicitud::listarPorEmailPaciente<\/a>"],[0,1,"<a href=\"Solicitud.php.html#210\">Solicitud::obtenerEstadisticasPorPaciente<\/a>"],[0,1,"<a href=\"Solicitud.php.html#225\">Solicitud::obtenerDatosPacientePorEmail<\/a>"],[100,1,"<a href=\"Usuario.php.html#5\">Usuario::__construct<\/a>"],[72.72727272727273,4,"<a href=\"Usuario.php.html#9\">Usuario::iniciarSesion<\/a>"],[46.93877551020408,20,"<a href=\"Usuario.php.html#28\">Usuario::crear<\/a>"],[100,1,"<a href=\"Usuario.php.html#105\">Usuario::validarEmail<\/a>"],[100,2,"<a href=\"Usuario.php.html#109\">Usuario::validarDNI<\/a>"],[100,2,"<a href=\"Usuario.php.html#113\">Usuario::validarTelefono<\/a>"],[80,2,"<a href=\"Usuario.php.html#117\">Usuario::listar<\/a>"],[100,1,"<a href=\"Usuario.php.html#126\">Usuario::eliminar<\/a>"],[0,2,"<a href=\"Usuario.php.html#133\">Usuario::listarMedicos<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>
