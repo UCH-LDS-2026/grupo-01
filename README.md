@@ -31,6 +31,7 @@ El sistema optimiza las evaluaciones, prioriza casos urgentes y brinda seguimien
 - Priorización automática (alta, media, baja)  
 - Panel de gestión (dashboard con solicitudes pendientes y urgentes)  
 - Adjuntar archivos médicos (órdenes, estudios, etc.)  
+- Parametrización dinámica de planes médicos (PMO inicial, Plenitud200, MediPro) desde la base de datos
 
 ---
 ## Estrategia de ramas
@@ -46,11 +47,15 @@ El sistema optimiza las evaluaciones, prioriza casos urgentes y brinda seguimien
 - **Backend:** PHP  
 - **Base de datos:** MySQL  
 - **Control de versiones:** Git + GitHub  
-
+- **Testing:** PHPUnit 10.5 + Xdebug (Code Coverage)
 ---
 
 ## Cómo ejecutar el proyecto
 Para ejecutar el sistema MediFlow en tu entorno local, es necesario contar con un servidor web y un motor de base de datos. Recomendamos utilizar **XAMPP**.
+
+### Requisitos previos
+* Servidor local XAMPP con PHP >= 8.1 habilitado.
+* Composer instalado en la computadora (requerido para ejecutar la suite de pruebas).
 
 ### 1. Preparación del Entorno (Instalación de XAMPP)
 1. Descargá XAMPP desde su [página oficial](https://www.apachefriends.org/es/index.html) (recomendamos la versión con PHP 8.x).
@@ -64,7 +69,7 @@ Para ejecutar el sistema MediFlow en tu entorno local, es necesario contar con u
    ```bash
    cd C:\xampp\htdocs
 
-### 3.Ejecuta elcomando para descargar el proyecto en tu computadora:
+### 3.Ejecuta el comando para descargar el proyecto en tu computadora:
 git clone [https://github.com/UCH-LDS-2026/grupo-01.git](https://github.com/UCH-LDS-2026/grupo-01.git)
 
 ### 4.Ingresar a la carpeta principal del proyecto
