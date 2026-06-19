@@ -1,24 +1,35 @@
-# Archivos del sistema
-.DS_Store
-Thumbs.db
+# 1. Archivos subidos por los usuarios (Estudios, Recetas)
+# Ignoramos todo lo que está adentro de la carpeta uploads
+uploads/*
+# Pero forzamos a Git a que SÍ mantenga la carpeta uploads vacía viva
+!uploads/.gitkeep
 
-# Configuración sensible
-config.php
-.env
+# 2. Bases de datos (Evitar subir datos reales o dumps pesados)
+*.sql
+# Excepto el esquema estructural que sirve de manual
+!schema.sql
 
-# Archivos temporales
+# 3. Archivos de registro y errores (Logs)
 *.log
-*.tmp
+error_log
 
-# Dependencias (si usan composer)
-vendor/
-
-# Archivos de IDE
+# 4. Configuraciones locales de los editores de código
 .vscode/
 .idea/
 
-# Node (si usan algo frontend)
-node_modules/
+# 5. Archivos basura del Sistema Operativo
+.DS_Store
+Thumbs.db
 
-# XAMPP / uploads
-uploads/
+# Ignorar dependencias de Composer
+vendor/
+
+# Ignorar archivos subidos por los usuarios (para no subir recetas de prueba)
+MediFlow/uploads/
+
+# Ignorar reportes locales (opcional, por si no querés subir el test-report.php)
+test-report.php
+
+.phpunit.cache/
+# Forzar siempre la subida de la librería QR
+!src/phpqrcode/
