@@ -54,11 +54,13 @@ class Usuario {
                 return false;
             }
         }
-
+//ESTA LINEA ES LA QUE HACE EL HASH DE LA CONTRASEÑA, SI NO SE HACE EL HASH, NO SE PUEDE INICIAR SESION//
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
         $this->conexion->begin_transaction();
-
+//variable paswordHash es la que se utiliza para almacenar la contraseña encriptada en la base de datos, //
+//mientras que la variable password contiene la contraseña original proporcionada por el usuario//
+//y la envia a la bd usando $stmt->bind_param(..lin67..)
         try {
             $sql = "INSERT INTO usuario (nombre, apellido, email, contrasena, rol, activo, dni) VALUES (?, ?, ?, ?, ?, 1, ?)";
             $stmt = $this->conexion->prepare($sql);

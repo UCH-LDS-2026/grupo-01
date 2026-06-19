@@ -23,7 +23,8 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['accion']) && $_GET['acci
     }
 }
 
-// Crear usuario
+// Crear usuario y guarda en la bd post captura la info ingresada en los campos del formulario de la pagina y /
+//null ??'' es para que si un campo llega vacio o no se envia se inicialice un texto vacio en lugar de que se rompa el script con el warning/
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion']) && $_POST['accion'] == 'crear') {
     $nombre = $_POST['nombre'] ?? '';
     $apellido = $_POST['apellido'] ?? '';
@@ -31,8 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['accion']) && $_POST['a
     $password = $_POST['password'] ?? ''; 
     $rol = $_POST['rol'] ?? '';
     $dni = $_POST['dni'] ?? ''; 
-
-    $extras = [];
+//como la bd tiene los campos separados o especificos por cada usuario el controlador discrimina el rol selecccionado /
+// y toma estos campos dinamicos dentro de $extras para dejar limpio los parametros/
     if ($rol == 'medico') {
         $extras['matricula'] = $_POST['matricula'] ?? '';
         $extras['especialidad'] = $_POST['especialidad'] ?? '';
