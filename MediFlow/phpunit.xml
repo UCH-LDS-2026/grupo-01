@@ -9,7 +9,7 @@
             <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <source> /**donde tiene que ver el test de cobertura*/
         <include>
             <directory suffix=".php">modelo</directory>
             <directory suffix=".php">controlador</directory>

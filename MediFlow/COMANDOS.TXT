@@ -1,10 +1,25 @@
 COMANDO PARA LOS TESTS:
 cd C:\xampp\htdocs\mediflow\grupo-01\MediFlow ; C:\xampp\php\php.exe test-report.php
 
+QUE HACE:
+
 //con cd C:\xampp\htdocs\mediflow\grupo-01\MediFlow nos aseguramos de estar en esa carpeta parados, de lo contrario da error.
 // ; significa que: primero hacé lo de la izquierda, y cuando termines, hacé lo de la derecha".
 //C:\xampp\php\php.exe test-report.php: Ejecutá nuestro archivo usando estrictamente el motor PHP de XAMPP, 
  ejecutamos test-report.php porque es nuestro script personalizado que limpia la basura de la consola y nos muestra los errores de forma prolija
 
+
+
 COMANDO PARA TEST DE COBERTURA: Para ver el % del test de cobertura poner en la terminal
  php -d xdebug.mode=coverage phpunit --coverage-html reporte-cobertura
+ 
+QUE HACE: mide calidad y alcance de test, escanea linea por linea el codigo ej. Usuario.php mientras se ejecutan las pruebas y calcula %
+-si tiene if, else y los test prueban solo caso de is, la cobertura va a marcar el else en rojo, indicando que hay zona ciega en la seguridad que ningun test evaluo.
+-sirve para demostrar al cliente que el sistema esta protegido no solo de palabras si no prueba mastematicas que el codigo fue ejecutado y validad en totalidad.
+
+ //php: llama a php para ejecutarse una instruccion.
+ //-d xdebug.mode=coverage: -d modifica una configuracioninterna de php, prende la ectension Xdebug y modo coverage.
+ //phpunit: el framework arranque y empiece a ejecutar todos los tests que escribimos (PacienteTest, ect)
+ 
+ //--coverage-html reporte-cobertura: le da la orden final al sistema, que haga una pagina web interactiva con graficos y colores,
+  guardandola adentro de una carpeta nueva que se llame reporte-cobertura.
