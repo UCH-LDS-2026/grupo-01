@@ -20,6 +20,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 1: crear evaluación con ESTADO VACÍO (dato inválido)
      */
+    /**QUE HACE: Prueba que si el auditor manda el campo estado en blanco "", el sistema lo rechaza y no guarda nada. */
     public function testCrearEvaluacionConEstadoVacio(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -44,6 +45,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 2: crear evaluación con ESTADO INVÁLIDO (no coincide con tipos permitidos)
      */
+    /**Verifica que el sistema solo acepte los estados permitidos (Aprobada, Rechazada, Observada). */
     public function testCrearEvaluacionConEstadoInvalido(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -69,6 +71,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 3: crear evaluación con ID_SOLICITUD NEGATIVO (dato inválido)
      */
+    /**QUE HACE: Validamos la integridad de datos. Un ID de solicitud -1 no existe, así que el sistema debe dar error. */
     public function testCrearEvaluacionConIDSolicitudNegativo(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -93,6 +96,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 4: crear evaluación con ID_AUDITOR CERO (dato inválido)
      */
+    /**QUE HACE: igual que el caso anterior nadie tiene el ID 0, por lo que se rechaza la operación. */
     public function testCrearEvaluacionConIDAuditorCero(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -117,6 +121,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 5: crear evaluación con OBSERVACIONES VACÍAS (caso límite)
      */
+    /**QUE HACE: Comprueba el caso opuesto. Si aprobar una solicitud no requiere observación obligatoria, enviar "" debería ser aceptado por el sistema.*/
     public function testCrearEvaluacionConObservacionesVacias(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -169,6 +174,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 7: crear evaluación con INYECCIÓN SQL en observaciones
      */
+    /**QUE HACE: clave de seguridad ante hackers si escribe '; DROP TABLE evaluacion; --. Verificamos que gracias a los Prepared Statements de PHP, esto se guarde como un texto inofensivo y no borre las tablas. */
     public function testCrearEvaluacionConInyeccionSQLEnObservaciones(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -197,6 +203,7 @@ class EvaluacionTest extends TestCase
     /**
      * Test 8: crear evaluación con IDS NO EXISTENT (foreign key constraint)
      */
+    /**QUE HACE: Fuerza un error de "Clave Foránea" (Foreign Key). Comprueba que si la base de datos tira un error interno, nuestro sistema de PHP lo ataja (con un catch) y no le muestra código roto al usuario */
     public function testCrearEvaluacionConIDsNoExistentes(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);

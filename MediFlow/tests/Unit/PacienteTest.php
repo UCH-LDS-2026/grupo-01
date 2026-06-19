@@ -20,6 +20,8 @@ class PacienteTest extends TestCase
     /**
      * Test 1: crear paciente con TELÉFONO CON LETRAS (dato inválido)
      */
+    /**QUE HACE:  : Probamos mandarle letras donde van letras El sistema 
+     * tiene que darse cuenta y abortar.*/
     public function testCrearPacienteConTelefonoInvalido(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -49,6 +51,8 @@ class PacienteTest extends TestCase
     /**
      * Test 2: crear paciente con EMAIL INVÁLIDO (sin @)
      */
+    /**QUE HACE: Le mandamos un correo sin el arroba @. El test confirma que
+     *  se bloquea la creación.*/
     public function testCrearPacienteConEmailInvalido(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -77,6 +81,7 @@ class PacienteTest extends TestCase
     /**
      * Test 3: crear paciente con DNI CON LETRAS (dato inválido)
      */
+     /**QUE HACE: que solo permita ingresar DNI con numeros si existen letras no es valido */
     public function testCrearPacienteConDNIInvalido(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -105,6 +110,8 @@ class PacienteTest extends TestCase
     /**
      * Test 4: crear paciente con FECHA FUTURA (caso inválido)
      */
+    /**QUE HACE: Verificamos que no se pueda registrar un paciente que "va a nacer en el año 2030*/
+
     public function testCrearPacienteConFechaFutura(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -133,6 +140,9 @@ class PacienteTest extends TestCase
     /**
      * Test 5: buscar paciente con TEXTO VACÍO (caso límite)
      */
+    /**QUE HACE: Verifica que el buscador no se vuelva loco si
+     *  el usuario aprieta "Buscar" sin escribir nada, devolviendo 
+     * un array vacío en vez de un error fatal. */
     public function testBuscarPacientePorTextoVacio(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -166,7 +176,11 @@ class PacienteTest extends TestCase
 
     /**
      * Test 6: buscar paciente por ID NEGATIVO (caso inválido)
-     */
+     */ 
+    /**QUE HACE:Prueba cómo reacciona tu buscador si alguien manipula la URL o el código 
+     * para buscar a un paciente con un ID imposible (por ejemplo, el paciente número -1). 
+     * El sistema debe darse cuenta de que no existe y devolver "Nada" (Null),
+     *  en lugar de colgarse o tirar un error fatal en la pantalla.  */
     public function testBuscarPacientePorIDNegativo(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -199,6 +213,8 @@ class PacienteTest extends TestCase
     /**
      * Test 7: crear paciente con NOMBRE MUY LARGO (SQL injection via length)
      */
+    /**QUE HACE:Mandamos un nombre de 1000 letras "A" para verificar que se respete 
+     * el límite de la base de datos. */
     public function testCrearPacienteConNombreLargo(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -228,6 +244,7 @@ class PacienteTest extends TestCase
     /**
      * Test 8: crear paciente con AFILIADO DUPLICADO (constraint BD)
      */
+    /**QUE HACE:Le mandamos a propósito un Número de Afiliado que ya existe. El test corrobora que la base de datos frene el duplicado y el sistema avise en lugar de sobreescribir. */
     public function testCrearPacienteConAfiliadoDuplicado(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);

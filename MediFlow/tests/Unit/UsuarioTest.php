@@ -28,6 +28,8 @@ class UsuarioTest extends TestCase
         $resultado = $this->usuario->iniciarSesion("", "cualquierpass");
         $this->assertFalse($resultado, "El sistema seguro debe rechazar el email vacío instantáneamente");
     }
+/**AMBOS TEST 1 Y 2: Demuestran que la capa defensiva que el mail/contraseña no sea vacio ya que puede frenar
+ *  al usuario en la puerta y no hace ninguna consulta a la base de datos para ahorrar recursos y evitar hackeos */
 
     /**
      * Test 2: iniciarSesion con CONTRASEÑA VACÍA
@@ -43,6 +45,8 @@ class UsuarioTest extends TestCase
     /**
      * Test 3: iniciarSesion con INYECCIÓN SQL
      */
+/**QUE HACE: en el login. Le pasamos admin' OR '1'='1 Verifica que el sistema lo detecte como un string falso. */
+
     public function testIniciarSesionConInyeccionSQL(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -73,7 +77,7 @@ class UsuarioTest extends TestCase
         $resultado = $this->usuario->eliminar(-1);
         $this->assertFalse($resultado, "ID negativo rechazado correctamente");
     }
-
+/**TEST 4 Y 5 QUE HACE: Comprueba que no se puedan borrar usuarios que no existen. */
     /**
      * Test 5: eliminar con ID CERO
      */
@@ -91,6 +95,7 @@ class UsuarioTest extends TestCase
     /**
      * Test 6: listar cuando devuelve resultado VACÍO
      */
+    /**QUE HACE: Asegura que la tabla del frontend no se rompa si la base de datos justo no tiene usuarios cargados. */
     public function testListarUsuariosVacio(): void
     {
         $resultMock = $this->createMock(mysqli_result::class);
@@ -105,6 +110,7 @@ class UsuarioTest extends TestCase
     /**
      * Test 7: crear usuario con EMAIL DUPLICADO
      */
+    /**QUE HACE: uso del Rollback. Si falla la creación porque el email existe, el sistema deshace todos los cambios a medias para que no queden datos basura. */ 
     public function testCrearUsuarioConEmailDuplicado(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -124,6 +130,7 @@ class UsuarioTest extends TestCase
     /**
      * Test 8: VULNERABILIDAD RESUELTA - Validación de campos vacíos
      */
+    /**QUE HACE: Verifica el uso de la función trim(). Si el usuario escribe " juan@test.com ", el sistema le corta los espacios antes de buscarlo. */
     public function testCrearUsuarioConCamposVaciosEsBloqueado(): void
     {
         $this->conexionMock->expects($this->never())->method('begin_transaction');
@@ -136,7 +143,9 @@ class UsuarioTest extends TestCase
     /**
      * Test 9: Crear usuario con NOMBRE muy largo
      */
-    public function testCrearUsuarioConNombreMuyLargo(): void
+    /**QUE HACE: Rollback si la base de datos rechaza un dato por ser demasiado pesado o largo, evitando que queden datos 
+     * guardados por la mitad.*/
+     public function testCrearUsuarioConNombreMuyLargo(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
         $nombreLargo = str_repeat("a", 300);
@@ -156,6 +165,7 @@ class UsuarioTest extends TestCase
     /**
      * Test 10: VULNERABILIDAD RESUELTA - Email Inválido
      */
+ /**QUE HACE: Validar formatos en el inicio para no molestar a la base de datos con basura. */
     public function testCrearUsuarioConEmailInvalidoEsBloqueado(): void
     {
         $this->conexionMock->expects($this->never())->method('begin_transaction');
@@ -170,6 +180,7 @@ class UsuarioTest extends TestCase
     /**
      * Test 11: VULNERABILIDAD RESUELTA - DNI Inválido
      */
+     /**QUE HACE:Evitar que se guarden letras en campos estrictamente numéricos. */
     public function testCrearUsuarioConDNIInvalidoEsBloqueado(): void
     {
         $this->conexionMock->expects($this->never())->method('begin_transaction');
@@ -184,6 +195,7 @@ class UsuarioTest extends TestCase
     /**
      * Test 12: VULNERABILIDAD RESUELTA - Teléfono Inválido
      */
+     /**QUE HACE: Igual que el DNI, validación estricta de tipos de datos.*/
     public function testCrearUsuarioConTelefonoInvalidoEsBloqueado(): void
     {
         $this->conexionMock->expects($this->never())->method('begin_transaction');
@@ -198,6 +210,8 @@ class UsuarioTest extends TestCase
     /**
      * Test 13: VULNERABILIDAD RESUELTA - Limpieza de espacios en email
      */
+     /**QUE HACE:Demuestra que el sistema es a prueba de errores humanos como cuando un usuario copia y pega su email y 
+      * sin querer copia un espacio al final (no debe haber espacios). */
     public function testIniciarSesionLimpiaEspaciosDelEmail(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);
@@ -222,9 +236,8 @@ class UsuarioTest extends TestCase
     /**
      * Test 14: VULNERABILIDAD CRÍTICA RESUELTA - Contraseña Hasheada
      */
-/**
-     * Test 14: VULNERABILIDAD CRÍTICA RESUELTA - Contraseña Hasheada
-     */
+/** QUE HACE:. Demuestra que si el usuario pone de clave "micontrasena123", lo que intenta viajar a la base de datos
+ *  es un hash encriptado imposible de leer, garantizando que el desarrollador nunca sabe las claves. */
     public function testCrearUsuarioEncriptaContrasena(): void
     {
         $stmtMock = $this->createMock(mysqli_stmt::class);

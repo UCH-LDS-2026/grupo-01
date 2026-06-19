@@ -1,5 +1,10 @@
 COMANDO PARA LOS TESTS:
 cd C:\xampp\htdocs\mediflow\grupo-01\MediFlow ; C:\xampp\php\php.exe test-report.php
 
+//con cd C:\xampp\htdocs\mediflow\grupo-01\MediFlow nos aseguramos de estar en esa carpeta parados, de lo contrario da error.
+// ; significa que: primero hacé lo de la izquierda, y cuando termines, hacé lo de la derecha".
+//C:\xampp\php\php.exe test-report.php: Ejecutá nuestro archivo usando estrictamente el motor PHP de XAMPP, 
+ ejecutamos test-report.php porque es nuestro script personalizado que limpia la basura de la consola y nos muestra los errores de forma prolija
+
 COMANDO PARA TEST DE COBERTURA: Para ver el % del test de cobertura poner en la terminal
  php -d xdebug.mode=coverage phpunit --coverage-html reporte-cobertura
